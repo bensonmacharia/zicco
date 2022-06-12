@@ -1,6 +1,6 @@
 ## Laravel CRUD Shop with LTEAdmin
 
-feature : 
+Feautures: 
 1. Auth allowing login with username
 2. crud product (datatable, upload product using ajax, description with ckeditor)
 3. crud category
