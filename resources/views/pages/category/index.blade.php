@@ -88,6 +88,8 @@ function loadList() {
 
     $.fn.dataTable.ext.errMode = 'ignore';
     var table = $('#category').DataTable({
+        "autoWidth": false,
+        "responsive": true,
         processing: true,
         serverSide: true,
         "bDestroy": true,
@@ -101,7 +103,7 @@ function loadList() {
                 render: function (data, type, row, meta) {
                     var result = '<a class="btn btn-success btn-sm" \
                                     data-id = '+row.id+' \
-                                    data-name = '+row.name+' \
+                                    data-name =  \''+row.name+'\' \
                                 onclick="editCategory(this)" data-toggle="modal" data-target="#InputModal"><i class="fa fa-edit"></i> edit</a>&nbsp;';
                     result += '<a class="btn btn-warning btn-sm" onclick="destroy('+row.id+')"><i class="fa fa-trash"></i> delete</a>';
                         return result;
@@ -114,7 +116,6 @@ function loadList() {
             sSearch: ""
         },
         aLengthMenu: [[4, 10, 15, 20], [4, 10, 15, 20]],
-        order: [[1, "asc"]],
         pageLength: 10,
         buttons: [
         ],
@@ -183,7 +184,7 @@ function editCategory(e) {
         var url = "{{url('admin/category/destroy')}}"+"/"+id;
         Swal.fire({
             title: `Are you sure?`,
-            text: ` will be permanantly deleted!`,
+            text: ` This item will be permanantly deleted!`,
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: '#3085d6',

@@ -16,10 +16,16 @@ class ReportsController extends Controller
         return view('pages/reports/index', compact('product', 'customer'));
     }
     
+    public function customer_sales() {
+        $product = Product::all();
+        $customer = Customer::all();
+        return view('pages/reports/customer_sales', compact('product', 'customer'));
+    }
+    
     public function today() {
         //$data = Sales::all()->sortByDesc('created_at')->values();
         $now = Carbon::now();
-        $data = Sales::whereDate('created_at', $now->format('Y-m-d'))->get();
+        $data = Sales::whereDate('updated_at', $now->format('Y-m-d'))->get();
 
         return datatables()->of($data)
                         ->addColumn('product', function ($data) {
@@ -42,7 +48,7 @@ class ReportsController extends Controller
                             return isset($data->user->username) ? $data->user->username : '';
                         })
                         ->addColumn('date_added', function ($data) {
-                            return isset($data->created_at) ? $data->created_at : '';
+                            return isset($data->updated_at) ? $data->updated_at : '';
                         })
                         ->addIndexColumn()
                         ->make(true);
@@ -50,7 +56,7 @@ class ReportsController extends Controller
     
     public function salesByDate($start, $end){
         
-        $data = Sales::whereBetween('created_at',   [$start." 00:00:00",$end." 23:59:59"])->get();
+        $data = Sales::whereBetween('updated_at',   [$start." 00:00:00",$end." 23:59:59"])->get();
 
         return datatables()->of($data)
                         ->addColumn('product', function ($data) {
@@ -79,7 +85,7 @@ class ReportsController extends Controller
                             return isset($data->user->username) ? $data->user->username : '';
                         })
                         ->addColumn('date_added', function ($data) {
-                            return isset($data->created_at) ? $data->created_at : '';
+                            return isset($data->updated_at) ? $data->updated_at : '';
                         })
                         ->addIndexColumn()
                         ->make(true);
@@ -115,7 +121,7 @@ class ReportsController extends Controller
                             return isset($data->user->username) ? $data->user->username : '';
                         })
                         ->addColumn('date_added', function ($data) {
-                            return isset($data->created_at) ? $data->created_at : '';
+                            return isset($data->updated_at) ? $data->updated_at : '';
                         })
                         ->addIndexColumn()
                         ->make(true);

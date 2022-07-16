@@ -11,13 +11,12 @@ use File;
 class ProductController extends Controller {
 
     public function index() {
-        $category = Category::all();
+        $category = Category::all()->sortBy('name')->values();
         return view('pages/product/index', compact('category'));
     }
 
     public function getData() {
-        $data = Product::with(['category'])->latest()->
-                        where('user_id', auth()->user()->id)->get();
+        $data = Product::all()->sortByDesc('created_at')->values();
 
         return datatables()->of($data)
                         ->addColumn('category_name', function ($data) {

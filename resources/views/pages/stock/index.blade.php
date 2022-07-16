@@ -1,9 +1,9 @@
 @extends('adminlte::page')
 
-@section('title', 'Stock')
+@section('title', 'Add Stock')
 
 @section('content_header')
-    <h1>Manage Stock</h1>
+    <h1>Add Stock</h1>
 @stop
 
 @section('content')
@@ -119,6 +119,8 @@ function loadList() {
 
     $.fn.dataTable.ext.errMode = 'ignore';
     var table = $('#product').DataTable({
+        "autoWidth": false,
+        "responsive": true,
         processing: true,
         serverSide: true,
         "bDestroy": true,
@@ -139,8 +141,7 @@ function loadList() {
             sSearch: ""
         },
         aLengthMenu: [[4, 10, 15, 20], [4, 10, 15, 20]],
-        order: [[1, "asc"]],
-        pageLength: 10,
+        pageLength: 20,
         buttons: [
         ],
         initComplete: function (settings, json) {

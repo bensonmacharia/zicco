@@ -10,13 +10,13 @@ use Illuminate\Http\Request;
 class SalesController extends Controller {
 
     public function index() {
-        $product = Product::all();
-        $customer = Customer::all();
+        $product = Product::all()->sortBy('name')->values();
+        $customer = Customer::all()->sortBy('name')->values();
         return view('pages/sales/index', compact('product', 'customer'));
     }
 
     public function getData() {
-        $data = Sales::all()->sortByDesc('created_at')->values();
+        $data = Sales::all()->sortByDesc('updated_at')->values();
 
         return datatables()->of($data)
                         ->addColumn('product', function ($data) {
@@ -39,7 +39,7 @@ class SalesController extends Controller {
                             return isset($data->user->username) ? $data->user->username : '';
                         })
                         ->addColumn('date_added', function ($data) {
-                            return isset($data->created_at) ? $data->created_at : '';
+                            return isset($data->updated_at) ? $data->updated_at : '';
                         })
                         ->addIndexColumn()
                         ->make(true);
@@ -86,9 +86,9 @@ class SalesController extends Controller {
     }
 
     public function destroy($id) {
-        $product = Product::where('id', $id)->first();
+        $sale = Sales::where('id', $id)->first();
 
-        if ($product->delete()) {
+        if ($sale->delete()) {
             $message = array();
             $message['message'] = 'Data deleted successfully';
 

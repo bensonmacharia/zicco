@@ -164,6 +164,8 @@ function loadList() {
 
     $.fn.dataTable.ext.errMode = 'ignore';
     var table = $('#product').DataTable({
+        "autoWidth": false,
+        "responsive": true,
         processing: true,
         serverSide: true,
         "bDestroy": true,
@@ -180,7 +182,7 @@ function loadList() {
                 render: function (data, type, row, meta) {
                     var result = '<a class="btn btn-success btn-sm" \
                                     data-id = '+row.id+' \
-                                    data-name = '+row.name+' \
+                                    data-name = \''+row.name+'\' \
                                     data-description = \''+row.description+'\' \
                                     data-price = '+row.price+' \
                                     data-category_id = '+row.category_id+' \
@@ -197,8 +199,7 @@ function loadList() {
             sSearch: ""
         },
         aLengthMenu: [[4, 10, 15, 20], [4, 10, 15, 20]],
-        order: [[1, "asc"]],
-        pageLength: 10,
+        pageLength: 20,
         buttons: [
         ],
         initComplete: function (settings, json) {
@@ -285,7 +286,7 @@ function editProduct(e) {
         var url = "{{url('admin/product/destroy')}}"+"/"+id;
         Swal.fire({
             title: `Are you sure?`,
-            text: ` will be permanantly deleted!`,
+            text: ` This item will be permanantly deleted!`,
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: '#3085d6',

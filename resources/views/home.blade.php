@@ -58,6 +58,7 @@
     $(document).ready(function(){
         loadSummarySalesCreditChart();
         loadSummarySalesWeekly();
+        loadSummaryStock();
     });
     
     function loadSummarySalesCreditChart(){
@@ -128,5 +129,6 @@
           options: barChartOptions
         })
     }
+    
 </script>
 @stop

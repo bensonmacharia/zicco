@@ -235,33 +235,47 @@ return [
             'type'         => 'fullscreen-widget',
             'topnav_right' => true,
         ],
-
-        ['header' => 'PRODUCT'],
         [
-            'text'        => 'Stock',
-            'url'         => 'product/stock',
-            'icon'        => 'far fa-circle text-warning',
+            'text'        => 'Home',
+            'url'         => 'home',
+            'icon'        => 'far fa-circle text-success',
+        ],
+        ['header' => 'STOCK'],
+        [
+            'text'        => 'Summary',
+            'url'         => 'stock/summary',
+            'icon'        => 'far fa-circle text-danger',
         ],
         [
-            'text'        => 'Products',
+            'text'        => 'Add Stock',
+            'url'         => 'stock/manage',
+            'icon'        => 'far fa-circle text-danger',
+        ],
+        ['header' => 'PRODUCT'],
+        [
+            'text'        => 'Add Product',
             'url'         => 'product/manage',
             'icon'        => 'far fa-circle text-warning',
         ],
         [
-            'text'        => 'Categories',
+            'text'        => 'Add Category',
             'url'         => 'product/category',
             'icon'        => 'far fa-circle text-warning',
         ],
         ['header' => 'SALE'],
         [
-            'text'        => 'Manage Sales',
+            'text'        => 'Record Sale',
             'url'         => 'sales/manage',
             'icon'        => 'far fa-circle text-info',
         ],
-        ['header' => 'REPORT'],
+        ['header' => 'SALES REPORT'],
         [
-            'text'        => 'Sales Report',
-            'url'         => 'report/sales',
+            'text'        => 'By Date',
+            'url'         => 'report/sales/by-date',
+        ],
+        [
+            'text'        => 'By Customer',
+            'url'         => 'report/sales/by-customer',
         ],
         ['header' => 'ADMIN'],
         [
@@ -320,15 +334,34 @@ return [
                     'location' => '//cdn.datatables.net/1.10.21/js/dataTables.bootstrap4.min.js',
                 ],
                 [
+                    'type' => 'js',
+                    'asset' => false,
+                    'location' => '//cdn.datatables.net/responsive/2.2.6/js/dataTables.responsive.min.js',
+                ],
+                [
+                    'type' => 'js',
+                    'asset' => false,
+                    'location' => '//cdn.datatables.net/responsive/2.2.6/js/responsive.bootstrap4.min.js',
+                ],
+                [
                     'type' => 'css',
                     'asset' => false,
                     'location' => '//cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css',
                 ],
-
                 [
                     'type' => 'css',
                     'asset' => false,
                     'location' => '//cdn.datatables.net/1.10.21/css/dataTables.bootstrap4.min.css',
+                ],
+                [
+                    'type' => 'css',
+                    'asset' => false,
+                    'location' => '//cdn.datatables.net/responsive/2.2.6/css/responsive.bootstrap.min.css',
+                ],
+                [
+                    'type' => 'css',
+                    'asset' => false,
+                    'location' => '//cdn.datatables.net/responsive/2.2.6/css/responsive.bootstrap4.min.css',
                 ],
             ],
         ],

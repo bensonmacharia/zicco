@@ -121,6 +121,8 @@ function loadList() {
 
     $.fn.dataTable.ext.errMode = 'ignore';
     var table = $('#product').DataTable({
+        "autoWidth": false,
+        "responsive": true,
         processing: true,
         serverSide: true,
         "bDestroy": true,
@@ -138,12 +140,11 @@ function loadList() {
                 render: function (data, type, row, meta) {
                     var result = '<a class="btn btn-success btn-sm" \
                                     data-id = '+row.id+' \
-                                    data-name = '+row.name+' \
+                                    data-name = \''+row.name+'\' \
                                     data-email = '+row.email+' \
-                                    data-phone = '+row.phone+' \
-                                    data-status = '+row.status+' \
+                                    data-phone = \''+row.phone+'\' \
+                                    data-status_id = '+row.status_id+' \
                                 onclick="editCustomer(this)" data-toggle="modal" data-target="#InputModal"><i class="fa fa-edit"></i> edit</a>&nbsp;';
-                    result += '<a class="btn btn-warning btn-sm" onclick="destroy('+row.id+')"><i class="fa fa-trash"></i> delete</a>';
                         return result;
                 }
             }
