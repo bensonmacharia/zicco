@@ -14,6 +14,11 @@ class AdminController extends Controller {
         return view('pages/admin/index');
     }
 
+    public function guide() {
+        //$customer = Customer::all()->sortByDesc('created_at')->values();
+        return view('pages/admin/guide');
+    }
+
     public function getData() {
         $data = Customer::all()->sortByDesc('created_at')->values();
 

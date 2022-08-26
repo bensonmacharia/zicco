@@ -14,7 +14,7 @@ return [
     |
     */
 
-    'title' => 'Zicco',
+    'title' => 'Demo TECH',
     'title_prefix' => '',
     'title_postfix' => '',
 
@@ -45,12 +45,12 @@ return [
     |
     */
 
-    'logo' => '<b>Zicco TECH</b>',
+    'logo' => '<b>Demo TECH</b>',
     'logo_img' => 'vendor/adminlte/dist/img/AdminLTELogo.png',
     'logo_img_class' => 'brand-image img-circle elevation-3',
     'logo_img_xl' => null,
     'logo_img_xl_class' => 'brand-image-xs',
-    'logo_img_alt' => 'Zicco',
+    'logo_img_alt' => 'Demo TECH',
 
     /*
     |--------------------------------------------------------------------------
@@ -277,11 +277,21 @@ return [
             'text'        => 'By Customer',
             'url'         => 'report/sales/by-customer',
         ],
+        [
+            'text'        => 'Debtors',
+            'url'         => 'report/sales/debtors',
+        ],
         ['header' => 'ADMIN'],
         [
             'text'        => 'Customers',
             'url'         => 'admin/customer',
             'icon'        => 'far fa-circle text-danger',
+        ],
+        ['header' => 'HELP'],
+        [
+            'text'        => 'User Guide',
+            'url'         => 'admin/guide',
+            'icon'        => 'far fa-circle text-info',
         ],
     ],
 

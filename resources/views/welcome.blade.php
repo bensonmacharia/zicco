@@ -7,7 +7,7 @@
         <meta name="author" content="">
         <link rel="icon" href="../../../../favicon.ico">
 
-        <title>Zicco TECH</title>
+        <title>Demo TECH</title>
 
         <!-- Bootstrap core CSS -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
@@ -44,8 +44,9 @@
     <body>
 
         <div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom box-shadow">
-            <h5 class="my-0 mr-md-auto font-weight-normal">Zicco TECH</h5>
+            <h5 class="my-0 mr-md-auto font-weight-normal">Demo TECH</h5>
             <nav class="my-2 my-md-0 mr-md-3">
+                <a class="p-2 text-dark" href="{{ url('/home/user-guide') }}">User Guide</a>
                 <a class="p-2 text-dark" href="#">About us</a>
                 <a class="p-2 text-dark" href="#">Contact us</a>
             </nav>
@@ -56,7 +57,7 @@
                     <a href="{{ route('login') }}" class="btn btn-outline-primary">Log in</a>
                     <a class="p-2 text-dark"></a>
                     @if (Route::has('register'))
-                        <!-- <a href="{{ route('register') }}" class="btn btn-outline-primary">Register</a> -->
+                        <a href="{{ route('register') }}" class="btn btn-outline-primary">Register</a>
                     @endif
                 @endauth
             @endif
@@ -89,7 +90,7 @@
                     </div>
                     <div class="card-body">
                         <ul class="list-unstyled mt-3 mb-4">
-                            <li>Dominion Exhibition</li>
+                            <li>Demo Exhibition</li>
                             <li>1st Floor D6</li>
                             <li>Opp. Imenti House</li>
                             <li>Along Tom Mboya Street</li>
@@ -103,7 +104,7 @@
                     </div>
                     <div class="card-body">
                         <ul class="list-unstyled mt-3 mb-4">
-                            <li>Tel: 0758571810</li>
+                            <li>Tel: 07XX-XXX-XXX</li>
                             <li>-</li>
                             <li>-</li>
                             <li>-</li>
@@ -116,7 +117,7 @@
             <footer class="pt-4 my-md-5 pt-md-5 border-top">
                 <div class="row">
                     <div class="col-12 col-md">
-                        <small class="d-block mb-3 text-muted">Zicco Technologies | &copy; <?php echo date('Y'); ?> </small>
+                        <small class="d-block mb-3 text-muted">Demo Technologies | &copy; <?php echo date('Y'); ?> </small>
                     </div>
                 </div>
             </footer>

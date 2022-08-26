@@ -21,6 +21,43 @@ class ReportsController extends Controller
         $customer = Customer::all();
         return view('pages/reports/customer_sales', compact('product', 'customer'));
     }
+
+    public function debtors() {
+        $product = Product::all();
+        $customer = Customer::all();
+        return view('pages/reports/debtors', compact('product', 'customer'));
+    }
+
+    public function getDebtors() {
+        $data = Sales::whereColumn('total_price', '!=', 'amnt_paid')->get()->sortBy('customer_id');
+
+        return datatables()->of($data)
+                        ->addColumn('product', function ($data) {
+                            return isset($data->product->name) ? $data->product->name : '';
+                        })
+                        ->addColumn('customer', function ($data) {
+                            return isset($data->customer->name) ? $data->customer->name : '';
+                        })
+                        ->addColumn('paid', function ($data) {
+                            return $data->amnt_paid;
+                        })
+                        ->addColumn('balance', function ($data) {
+                            $balance = $data->total_price - $data->amnt_paid;
+                            return $balance;
+                        })
+                        ->addColumn('total_price', function ($data) {
+                            return $data->total_price;
+                        })
+                        ->addColumn('date_added', function ($data) {
+                            return isset($data->updated_at) ? $data->updated_at : '';
+                        })
+                        ->addColumn('time_ago', function ($data) {
+                            $dateAgo = $data->updated_at->diffForHumans();
+                            return $dateAgo;
+                        })
+                        ->addIndexColumn()
+                        ->make(true);
+    }
     
     public function today() {
         //$data = Sales::all()->sortByDesc('created_at')->values();

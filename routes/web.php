@@ -16,9 +16,12 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+Route::get('/home/user-guide', function () {
+    return view('guide');
+});
 
-//Auth::routes();
-Auth::routes(['register' => false]);
+Auth::routes();
+//Auth::routes(['register' => false]);
 
 Route::group(['middleware' => ['auth']], function() {
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
@@ -39,6 +42,7 @@ Route::group(['middleware' => ['auth']], function() {
     Route::post('admin/category/save', [App\Http\Controllers\CategoryController::class, 'store']);
     Route::post('admin/category/destroy/{id}', [App\Http\Controllers\CategoryController::class, 'destroy']);
     Route::get('admin/customer', [App\Http\Controllers\AdminController::class, 'index'])->name('customer');
+    Route::get('admin/guide', [App\Http\Controllers\AdminController::class, 'guide'])->name('guide');
     Route::get('admin/customer/get-data', [App\Http\Controllers\AdminController::class, 'getData']);
     Route::post('admin/customer/save', [App\Http\Controllers\AdminController::class, 'store']);
     Route::get('sales/manage', [App\Http\Controllers\SalesController::class, 'index'])->name('sales');
@@ -47,6 +51,8 @@ Route::group(['middleware' => ['auth']], function() {
     Route::post('admin/sale/destroy/{id}', [App\Http\Controllers\SalesController::class, 'destroy']);
     Route::get('report/sales/by-date', [App\Http\Controllers\ReportsController::class, 'index'])->name('turnover');
     Route::get('report/sales/by-customer', [App\Http\Controllers\ReportsController::class, 'customer_sales'])->name('customer-sales');
+    Route::get('report/sales/debtors', [App\Http\Controllers\ReportsController::class, 'debtors'])->name('debtors');
+    Route::get('report/sales/get-debtors', [App\Http\Controllers\ReportsController::class, 'getDebtors']);
     Route::get('report/sales/today', [App\Http\Controllers\ReportsController::class, 'today'])->name('today');
     Route::get('report/sales/salesByDate/{start}/{end}', [App\Http\Controllers\ReportsController::class, 'salesByDate']);
     Route::get('report/sales/salesByCustomer/{customer}', [App\Http\Controllers\ReportsController::class, 'salesByCustomer']);
