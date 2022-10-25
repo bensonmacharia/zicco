@@ -5,15 +5,17 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Sales;
 use App\Models\Product;
+use App\Models\Order;
 use App\Models\Stock;
 
 class StockController extends Controller {
 
     public function index() {
         $product = Product::all()->sortBy('name')->values();
-        return view('pages/stock/index', compact('product'));
+        $order = Order::all()->sortBy('id')->values();
+        return view('pages/stock/index', compact('product', 'order'));
     }
-    
+
     public function summary() {
         $product = Product::all()->sortBy('name')->values();
         return view('pages/stock/summary', compact('product'));
@@ -80,7 +82,8 @@ class StockController extends Controller {
                             return isset($data->product->name) ? $data->product->name : '';
                         })
                         ->addColumn('total_cost', function ($data) {
-                            return $data->cost ? 'KES. ' . number_format($data->cost, 0, ',', ',') : '';
+                            $total = $data->pcost + $data->ccost + $data->tcost;
+                            return 'KES. ' . number_format($total, 0, ',', ',');
                         })
                         ->addColumn('added_by', function ($data) {
                             return isset($data->user->username) ? $data->user->username : '';
@@ -95,9 +98,13 @@ class StockController extends Controller {
     public function store(Request $req) {
         $id = $req->id ?: 0;
         $validated = $req->validate([
+            'order_id' => 'required',
             'product_id' => 'required',
+            'batch' => 'required|max:10',
             'units' => 'required|max:50',
-            'cost' => 'required',
+            'pcost' => 'required',
+            'ccost' => 'required',
+            'tcost' => 'required',
         ]);
         $data_input = $req->all();
         if ($id) {
@@ -105,7 +112,9 @@ class StockController extends Controller {
         } else {
             $data_input['created_at'] = date('Y-m-d H:i:s');
         }
-        $data_input['cost'] = str_replace('.', '', $data_input['cost']);
+        $data_input['pcost'] = str_replace('.', '', $data_input['pcost']);
+        $data_input['ccost'] = str_replace('.', '', $data_input['ccost']);
+        $data_input['tcost'] = str_replace('.', '', $data_input['tcost']);
         $data_input['user_id'] = auth()->user()->id;
 
         $stock = Stock::updateOrCreate(['id' => $id], $data_input);

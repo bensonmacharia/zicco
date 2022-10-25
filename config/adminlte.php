@@ -240,16 +240,28 @@ return [
             'url'         => 'home',
             'icon'        => 'far fa-circle text-success',
         ],
+        ['header' => 'SALE'],
+        [
+            'text'        => 'Record Sale',
+            'url'         => 'sales/manage',
+            'icon'        => 'far fa-circle text-danger',
+        ],
+        ['header' => 'ORDERS'],
+        [
+            'text'        => 'Create Order',
+            'url'         => 'order/manage',
+            'icon'        => 'far fa-circle',
+        ],
         ['header' => 'STOCK'],
         [
             'text'        => 'Summary',
             'url'         => 'stock/summary',
-            'icon'        => 'far fa-circle text-danger',
+            'icon'        => 'far fa-circle text-info',
         ],
         [
-            'text'        => 'Add Stock',
+            'text'        => 'Record Stock',
             'url'         => 'stock/manage',
-            'icon'        => 'far fa-circle text-danger',
+            'icon'        => 'far fa-circle text-info',
         ],
         ['header' => 'PRODUCT'],
         [
@@ -261,12 +273,6 @@ return [
             'text'        => 'Add Category',
             'url'         => 'product/category',
             'icon'        => 'far fa-circle text-warning',
-        ],
-        ['header' => 'SALE'],
-        [
-            'text'        => 'Record Sale',
-            'url'         => 'sales/manage',
-            'icon'        => 'far fa-circle text-info',
         ],
         ['header' => 'SALES REPORT'],
         [
@@ -285,6 +291,11 @@ return [
         [
             'text'        => 'Customers',
             'url'         => 'admin/customer',
+            'icon'        => 'far fa-circle text-danger',
+        ],
+        [
+            'text'        => 'Partners',
+            'url'         => 'admin/partners',
             'icon'        => 'far fa-circle text-danger',
         ],
         ['header' => 'HELP'],

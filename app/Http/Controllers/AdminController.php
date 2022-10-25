@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Customer;
+use App\Models\Partner;
 use Illuminate\Http\Request;
 use Illuminate\Filesystem\Filesystem;
 use File;
@@ -12,6 +13,11 @@ class AdminController extends Controller {
     public function index() {
         //$customer = Customer::all()->sortByDesc('created_at')->values();
         return view('pages/admin/index');
+    }
+
+    public function partner() {
+        //$customer = Customer::all()->sortByDesc('created_at')->values();
+        return view('pages/admin/partner');
     }
 
     public function guide() {
@@ -35,6 +41,23 @@ class AdminController extends Controller {
                         })
                         ->addIndexColumn()
                         ->make(true);
+    }
+
+    public function get_partners(){
+        $data = Partner::all()->sortBy('id')->values();
+        return datatables()->of($data)
+            ->addColumn('added_by', function ($data) {
+                return isset($data->user->username) ? $data->user->username : '';
+            })
+            ->addColumn('date_added', function ($data) {
+                return isset($data->created_at) ? $data->created_at : '';
+            })
+            ->addColumn('partner_status', function ($data) {
+                $stat = $data->status_id;
+                return $stat === 1 ? "Active" : "Inactive";
+            })
+            ->addIndexColumn()
+            ->make(true);
     }
 
     public function store(Request $req) {
@@ -65,6 +88,40 @@ class AdminController extends Controller {
         } else {
 
             $message = array();
+            $message['message'] = 'Data failed to save';
+
+            return response()->json($message)->setStatusCode(400);
+        }
+    }
+
+    public function add_partner(Request $req) {
+        $id = $req->id ?: 0;
+
+        $validated = $req->validate([
+            'name' => 'required|unique:products|max:50',
+            'email' => 'required|max:50',
+            'phone' => 'required|max:50',
+            'profit_share' => 'required',
+            'status_id' => 'required',
+        ]);
+
+        $data_input = $req->all();
+        if ($id) {
+            $data_input['updated_at'] = date('Y-m-d H:i:s');
+        } else {
+            $data_input['created_at'] = date('Y-m-d H:i:s');
+        }
+        $data_input['user_id'] = auth()->user()->id;
+
+        $partner = Partner::updateOrCreate(['id' => $id], $data_input);
+
+        $message = array();
+        if ($partner) {
+            $message['message'] = 'Data saved successfully';
+
+            return response()->json($message)->setStatusCode(200);
+        } else {
+
             $message['message'] = 'Data failed to save';
 
             return response()->json($message)->setStatusCode(400);

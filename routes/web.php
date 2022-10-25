@@ -33,6 +33,11 @@ Route::group(['middleware' => ['auth']], function() {
     Route::post('admin/product/destroy/{id}', [App\Http\Controllers\ProductController::class, 'destroy']);
     Route::post('admin/upload-product', [App\Http\Controllers\ProductController::class, 'upload_product']);
     Route::get('product/category', [App\Http\Controllers\CategoryController::class, 'index'])->name('category');
+    Route::get('order/manage', [App\Http\Controllers\OrderController::class, 'index'])->name('order');
+    Route::post('admin/order/save', [App\Http\Controllers\OrderController::class, 'store']);
+    Route::post('admin/order/payment', [App\Http\Controllers\OrderController::class, 'payment']);
+    Route::get('admin/order/get-data', [App\Http\Controllers\OrderController::class, 'getData']);
+    Route::get('admin/order/get-order/{id}', [App\Http\Controllers\OrderController::class, 'getOrder']);
     Route::get('stock/summary', [App\Http\Controllers\StockController::class, 'summary'])->name('summary');
     Route::get('stock/load_stock_summary', [App\Http\Controllers\StockController::class, 'load_stock_summary']);
     Route::get('stock/manage', [App\Http\Controllers\StockController::class, 'index'])->name('stock');
@@ -42,6 +47,9 @@ Route::group(['middleware' => ['auth']], function() {
     Route::post('admin/category/save', [App\Http\Controllers\CategoryController::class, 'store']);
     Route::post('admin/category/destroy/{id}', [App\Http\Controllers\CategoryController::class, 'destroy']);
     Route::get('admin/customer', [App\Http\Controllers\AdminController::class, 'index'])->name('customer');
+    Route::get('admin/partners', [App\Http\Controllers\AdminController::class, 'partner'])->name('partners');
+    Route::post('admin/partner/save', [App\Http\Controllers\AdminController::class, 'add_partner']);
+    Route::get('admin/partner/get-data', [App\Http\Controllers\AdminController::class, 'get_partners']);
     Route::get('admin/guide', [App\Http\Controllers\AdminController::class, 'guide'])->name('guide');
     Route::get('admin/customer/get-data', [App\Http\Controllers\AdminController::class, 'getData']);
     Route::post('admin/customer/save', [App\Http\Controllers\AdminController::class, 'store']);
