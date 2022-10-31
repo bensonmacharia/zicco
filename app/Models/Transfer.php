@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Contribution extends Model
+class Transfer extends Model
 {
     use HasFactory;
 
@@ -15,9 +15,9 @@ class Contribution extends Model
         'updated_at',
     ];
 
-    public function partner()
+    public function stock()
     {
-        return $this->belongsTo(Partner::class);
+        return $this->belongsTo(Stock::class);
     }
 
     public function order()

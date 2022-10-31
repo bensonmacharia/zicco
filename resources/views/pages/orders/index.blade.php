@@ -163,6 +163,7 @@
                 <div class="modal-body">
                     <div class="form-group row">
                         <input type="hidden" id="order_id" name="order_id">
+                        <input type="hidden" id="payment_type_id" name="payment_type_id">
                         <label for="product_cost" class="col-sm-3 col-form-label">Product Cost *</label>
                         <div class="col-sm-8">
                             <div class="input-group mb-3">
@@ -193,6 +194,51 @@
                         </div>
                     </div>
                     @endforeach
+                    <div class="d-none" id="transferDiv">
+                        <div class="m-3">
+                            <table id="add_table" class="table" data-toggle="table" data-mobile-responsive="true">
+                                <thead>
+                                    <tr>
+                                        <th>Product</th>
+                                        <th>Amount</th>
+                                        <th>
+                                            <button class="btn btn-outline-success" id="add_row" class="add" onclick="addRow()"> + Add
+                                            </button>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <div class="form-group">
+                                                <select class="form-control select2" id="item" name="item"
+                                                        style="width:100%">
+                                                    <option value=''>--Select Product--</option>
+                                                    @foreach($stock as $row)
+                                                    <option value="{{ $row->id }}">{{ $row->batch." - ".$row->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-group">
+                                                <div class="input-group mb-3">
+                                                    <span class="input-group-text">KES</span>
+                                                    <input type="text" autocomplete="off"
+                                                           class="form-control numeral-mask" id="tamount"
+                                                           name="tamount" placeholder="Amount" required>
+                                                    <span class="input-group-text">.00</span>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-outline-danger delete_row"><i class="fa fa-trash"></i></button>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -229,7 +275,7 @@
     });
 
     function loadList() {
-        const page_url = '{{ url('admin/order/get-data') }}';
+        const page_url = '{{ url('admin/order/get-data')}}';
 
         $.fn.dataTable.ext.errMode = 'ignore';
         var table = $('#orders').DataTable({
@@ -310,12 +356,24 @@
     }
 
     function editPayment(e) {
+        $('#formPayment').trigger("reset");
         var cost = $(e).data('pcost') + $(e).data('ccost') + $(e).data('tcost') ;
         $('#order_id').val($(e).data('id'));
+        $('#payment_type_id').val($(e).data('payment'));
         $('#product_cost').val($(e).data('scost'));
         $('#amount-1').val(cost/2);
         $('#amount-2').val(cost/2);
         $('#amount-3').val(0);
+
+        var pyt = document.getElementById('payment_type_id').value;
+        //console.log(pyt);
+        if (pyt === '1' ){
+            $("#transferDiv").removeClass('d-none');
+        } else {
+            $("#transferDiv").addClass('d-none');
+        }
+
+        $('.alert').hide();
     }
 
     function saveOrder() {
@@ -388,61 +446,34 @@
     }
 
     function savePaymentDetails(){
-        var data = $('#formPayment').serializeArray().reduce(function(obj, item) {
-            obj[item.name] = item.value;
-            return obj;
-        }, {});
-        console.log(data);
-
+        var myData = $('#formPayment').serialize();
+        var csrf = $('meta[name="csrf_token"]').attr('content');
         var url = "{{ url('admin/order/payment') }}";
+        $.ajax({
+            url: url,
+            type: 'post',
+            dataType: 'json',
+            headers: {
+                'X-CSRF-TOKEN': csrf,
+            },
+            data: {
+                "_token": csrf,
+                data : myData
+            },
+            success: function(result) {
+                document.getElementById("submitOrder").disabled = false;
 
-        let order_id = data['order_id'];
-        let partner1 = data['partner-1'];
-        let partner2 = data['partner-3'];
-        let partner3 = data['partner-3'];
-        let amount1 = data['amount-1'];
-        let amount2 = data['amount-3'];
-        let amount3 = data['amount-3'];
-
-        if (order_id === null) {
-            Swal.fire("Error!", "Order ID required", "error");
-        } else {
-            var form_data = new FormData();
-            form_data.append('order_id', order_id);
-            form_data.append('partner1', partner1);
-            form_data.append('partner2', partner2);
-            form_data.append('partner3', partner3);
-            form_data.append('amount1', amount1);
-            form_data.append('amount2', amount2);
-            form_data.append('amount3', amount3);
-
-            $.ajax({
-                type: "POST",
-                url: url,
-                beforeSend: function (xhr) {
-                    var token = $('meta[name="csrf_token"]').attr('content');
-
-                    if (token) {
-                        return xhr.setRequestHeader('X-CSRF-TOKEN', token);
-                    }
-                },
-                data: form_data,
-                dataType: "json",
-                contentType: false,
-                cache: false,
-                processData: false,
-                success: function (result) {
-                    document.getElementById("submitPaymentDetails").disabled = false;
-
-                    $('#PartnerModal').modal('hide');
-                    Swal.fire("Success!", result.message, "success");
-                    loadList();
-                }, error: function (xhr, status, error) {
-                    Swal.fire("Error!", JSON.stringify(xhr.responseJSON.errors), "error");
-                    document.getElementById("submitPaymentDetails").disabled = false;
-                },
-            });
-        }
+                $('#InputModal').modal('hide');
+                Swal.fire("Success!", result.message, "success");
+                $('#formPayment').trigger("reset");
+                loadList();
+            },
+            error: function(xhr, status, error){
+                $('#formPayment').trigger("reset");
+                Swal.fire("Error!", JSON.stringify(xhr.responseJSON.errors), "error");
+                document.getElementById("submitOrder").disabled = false;
+            },
+        });
     }
 
     function resetForm() {
@@ -459,6 +490,20 @@
         $('.alert').hide();
         $('#formOrder').trigger("reset");
     }
+    var clicks = 0;
+    function addRow(){
+        clicks += 1;
+        //console.log(clicks);
+        //Add row
+        row = '';
+        row += '<tr><td><div class="form-group"><select class="form-control select2" id="item_id" name="item_id" style="width:100%"><option value="">--Select Product--</option>@foreach($stock as $row)<option value="{{ $row->id }}">{{ $row->batch." - ".$row->name }}</option>@endforeach </select></div></td><td><div class="form-group"><div class="input-group mb-3"><span class="input-group-text">KES</span><input type="text" autocomplete="off" class="form-control numeral-mask" id="tamount_id" name="tamount_id" placeholder="Amount" required><span class="input-group-text">.00</span></div></div></td>';
+        row += '<td><button class="btn btn-outline-danger delete_row"><i class="fa fa-trash"></i></button></td></tr>';
+        $('#item_id').attr('name', 'item_id_'+clicks);
+        $('#item_id').attr('id', 'item_id_'+clicks);
+        $('#tamount_id').attr('name', 'tamount_id_'+clicks);
+        $('#tamount_id').attr('id', 'tamount_id_'+clicks);
+        $("#add_table").append(row);
+    }
 </script>
 <script>
     $('.numeral-mask').each(function (index, ele) {
@@ -467,6 +512,11 @@
             numeralDecimalMark: ',',
             delimiter: '.'
         });
+    });
+
+    $("#add_table").on('click', '.delete_row', function (e) {
+        e.preventDefault();
+        $(this).closest('tr').remove();
     });
 </script>
 @stop

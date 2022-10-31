@@ -246,6 +246,12 @@ return [
             'url'         => 'sales/manage',
             'icon'        => 'far fa-circle text-danger',
         ],
+        ['header' => 'EXPENSES'],
+        [
+            'text'        => 'Record Expense',
+            'url'         => 'expense/manage',
+            'icon'        => 'far fa-circle text-warning',
+        ],
         ['header' => 'ORDERS'],
         [
             'text'        => 'Create Order',
@@ -263,6 +269,11 @@ return [
             'url'         => 'stock/manage',
             'icon'        => 'far fa-circle text-info',
         ],
+        [
+            'text'        => 'Sold Out',
+            'url'         => 'stock/soldout',
+            'icon'        => 'far fa-circle text-info',
+        ],
         ['header' => 'PRODUCT'],
         [
             'text'        => 'Add Product',
@@ -274,27 +285,34 @@ return [
             'url'         => 'product/category',
             'icon'        => 'far fa-circle text-warning',
         ],
-        ['header' => 'SALES REPORT'],
+        ['header' => 'CUSTOMER'],
         [
-            'text'        => 'By Date',
-            'url'         => 'report/sales/by-date',
+            'text'        => 'Add Customer',
+            'url'         => 'admin/customer',
+            'icon'        => 'far fa-circle text-success',
         ],
         [
-            'text'        => 'By Customer',
+            'text'        => 'Customer Report',
             'url'         => 'report/sales/by-customer',
+            'icon'        => 'far fa-circle text-success',
+        ],
+        ['header' => 'REPORTS'],
+        [
+            'text'        => 'Date Sales',
+            'url'         => 'report/sales/by-date',
         ],
         [
             'text'        => 'Debtors',
             'url'         => 'report/sales/debtors',
         ],
-        ['header' => 'ADMIN'],
+        ['header' => 'PARTNER'],
         [
-            'text'        => 'Customers',
-            'url'         => 'admin/customer',
+            'text'        => 'Manage Partners',
+            'url'         => 'admin/partners',
             'icon'        => 'far fa-circle text-danger',
         ],
         [
-            'text'        => 'Partners',
+            'text'        => 'Share Capital',
             'url'         => 'admin/partners',
             'icon'        => 'far fa-circle text-danger',
         ],

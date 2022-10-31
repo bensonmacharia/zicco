@@ -74,6 +74,41 @@ class StockController extends Controller {
                         ->make(true);
     }
 
+    public function soldout(){
+        $product = Product::all()->sortBy('name')->values();
+        $order = Order::all()->sortBy('id')->values();
+        return view('pages/stock/soldout', compact('product', 'order'));
+    }
+
+    public function getSoldOut() {
+        $data = Stock::all()->sortByDesc('created_at')->where('soldout', 1)->values();
+
+        return datatables()->of($data)
+            ->addColumn('product_name', function ($data) {
+                return isset($data->product->name) ? $data->product->name : '';
+            })
+            ->addColumn('total_cost', function ($data) {
+                $total = $data->pcost + $data->ccost + $data->tcost;
+                return 'KES. ' . number_format($total, 0, ',', ',');
+            })
+            ->addColumn('total_sales', function ($data) {
+                return $data->order->esale ? 'KES. ' . number_format($data->order->esale, 0, ',', ',') : '';
+            })
+            ->addColumn('profit', function ($data) {
+                $total = $data->pcost + $data->ccost + $data->tcost;
+                $profit = $data->order->esale -$total;
+                return 'KES. ' . number_format($profit, 0, ',', ',');
+            })
+            ->addColumn('added_by', function ($data) {
+                return isset($data->user->username) ? $data->user->username : '';
+            })
+            ->addColumn('date_added', function ($data) {
+                return isset($data->created_at) ? $data->created_at : '';
+            })
+            ->addIndexColumn()
+            ->make(true);
+    }
+
     public function getData() {
         $data = Stock::all()->sortByDesc('created_at')->values();
 
@@ -99,6 +134,7 @@ class StockController extends Controller {
         $id = $req->id ?: 0;
         $validated = $req->validate([
             'order_id' => 'required',
+            'soldout' => 'required',
             'product_id' => 'required',
             'batch' => 'required|max:10',
             'units' => 'required|max:50',

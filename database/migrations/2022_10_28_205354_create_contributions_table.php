@@ -20,7 +20,6 @@ class CreateContributionsTable extends Migration
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
             $table->integer('partner_id');
-            $table->integer('payment_type_id');
             $table->double('amount');
             $table->timestamps();
         });

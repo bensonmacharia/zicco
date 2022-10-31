@@ -2,83 +2,98 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Contribution;
+use App\Models\Stock;
+use App\Models\Transfer;
 use Illuminate\Http\Request;
 use App\Models\Partner;
 use App\Models\Product;
 use App\Models\Order;
 
-class OrderController extends Controller {
+use Illuminate\Support\Facades\DB;
 
-    public function index() {
+class OrderController extends Controller
+{
+
+    public function index()
+    {
         $product = Product::all()->sortBy('name')->values();
+        $stock = Stock::all()->sortBy('name')->values();
+        $stock = DB::table('orders')
+            ->join('products', 'products.id', '=', 'orders.product_id')
+            ->select('*')
+            ->get();
         $partner = Partner::all()->sortBy('id')->values();
-        return view('pages/orders/index', compact('product', 'partner'));
+        return view('pages/orders/index', compact('product', 'partner', 'stock'));
     }
 
 
-    public function getData() {
+    public function getData()
+    {
         $data = Order::all()->sortByDesc('created_at')->values();
 
         return datatables()->of($data)
-                        ->addColumn('product_name', function ($data) {
-                            return isset($data->product->name) ? $data->product->name : '';
-                        })
-                        ->addColumn('batch', function ($data) {
-                            return isset($data->batch) ? $data->batch : '';
-                        })
-                        ->addColumn('units', function ($data) {
-                            return isset($data->units) ? $data->units : '';
-                        })
-                        ->addColumn('ppcost', function ($data) {
-                            return $data->pcost ? 'KES. ' . number_format($data->pcost, 0, ',', ',') : '';
-                        })
-                        ->addColumn('cccost', function ($data) {
-                            return $data->ccost ? 'KES. ' . number_format($data->ccost, 0, ',', ',') : '';
-                        })
-                        ->addColumn('ttcost', function ($data) {
-                            return $data->tcost ? 'KES. ' . number_format($data->tcost, 0, ',', ',') : '';
-                        })
-                        ->addColumn('scost', function ($data) {
-                            $total = $data->pcost + $data->ccost + $data->tcost;
-                            return 'KES. ' . number_format($total, 0, ',', ',');
-                        })
-                        ->addColumn('eprofit', function ($data) {
-                            $total_cost = $data->pcost + $data->ccost + $data->tcost;
-                            $eprofit = $data->esale - $total_cost;
-                            return $eprofit;
-                        })
-                        ->addColumn('expense', function ($data) {
-                            $total_cost = $data->pcost + $data->ccost + $data->tcost;
-                            $eprofit = $data->esale - $total_cost;
-                            return (10 / 100) * $eprofit;
-                        })
-                        ->addColumn('nprofit', function ($data) {
-                            $total_cost = $data->pcost + $data->ccost + $data->tcost;
-                            $eprofit = $data->esale - $total_cost;
-                            return (90 / 100) * $eprofit;
-                        })
-                        ->addColumn('profitability', function ($data) {
-                            $total_cost = $data->pcost + $data->ccost + $data->tcost;
-                            $eprofit = $data->esale - $total_cost;
-                            $nprofit = (90 / 100) * $eprofit;;
-                            return ($nprofit / $data->esale) * 100;
-                        })
-                        ->addColumn('added_by', function ($data) {
-                            return isset($data->user->username) ? $data->user->username : '';
-                        })
-                        ->addColumn('date_added', function ($data) {
-                            return isset($data->created_at) ? $data->created_at : '';
-                        })
-                        ->addIndexColumn()
-                        ->make(true);
+            ->addColumn('product_name', function ($data) {
+                return isset($data->product->name) ? $data->product->name : '';
+            })
+            ->addColumn('batch', function ($data) {
+                return isset($data->batch) ? $data->batch : '';
+            })
+            ->addColumn('units', function ($data) {
+                return isset($data->units) ? $data->units : '';
+            })
+            ->addColumn('ppcost', function ($data) {
+                return $data->pcost ? 'KES. ' . number_format($data->pcost, 0, ',', ',') : '';
+            })
+            ->addColumn('cccost', function ($data) {
+                return $data->ccost ? 'KES. ' . number_format($data->ccost, 0, ',', ',') : '';
+            })
+            ->addColumn('ttcost', function ($data) {
+                return $data->tcost ? 'KES. ' . number_format($data->tcost, 0, ',', ',') : '';
+            })
+            ->addColumn('scost', function ($data) {
+                $total = $data->pcost + $data->ccost + $data->tcost;
+                return 'KES. ' . number_format($total, 0, ',', ',');
+            })
+            ->addColumn('eprofit', function ($data) {
+                $total_cost = $data->pcost + $data->ccost + $data->tcost;
+                $eprofit = $data->esale - $total_cost;
+                return $eprofit;
+            })
+            ->addColumn('expense', function ($data) {
+                $total_cost = $data->pcost + $data->ccost + $data->tcost;
+                $eprofit = $data->esale - $total_cost;
+                return (10 / 100) * $eprofit;
+            })
+            ->addColumn('nprofit', function ($data) {
+                $total_cost = $data->pcost + $data->ccost + $data->tcost;
+                $eprofit = $data->esale - $total_cost;
+                return (90 / 100) * $eprofit;
+            })
+            ->addColumn('profitability', function ($data) {
+                $total_cost = $data->pcost + $data->ccost + $data->tcost;
+                $eprofit = $data->esale - $total_cost;
+                $nprofit = (90 / 100) * $eprofit;;
+                return ($nprofit / $data->esale) * 100;
+            })
+            ->addColumn('added_by', function ($data) {
+                return isset($data->user->username) ? $data->user->username : '';
+            })
+            ->addColumn('date_added', function ($data) {
+                return isset($data->created_at) ? $data->created_at : '';
+            })
+            ->addIndexColumn()
+            ->make(true);
     }
 
-    public function getOrder($id) {
+    public function getOrder($id)
+    {
         $data = Order::where('id', $id)->get();
         return $data;
     }
 
-    public function store(Request $req) {
+    public function store(Request $req)
+    {
         $id = $req->id ?: 0;
         $validated = $req->validate([
             'product_id' => 'required',
@@ -116,11 +131,78 @@ class OrderController extends Controller {
         }
     }
 
-    public function payment(Request $req) {
-        $validated = $req->validate([
-            'order_id' => 'required',
-        ]);
-        $data_input = $req->all();
+    public function payment(Request $req)
+    {
+        parse_str($req->data, $output);
+        $order_id = $output['order_id'];
+        $payment_type_id = $output['payment_type_id'];
+        $partner_1 = $output['partner-1'];
+        $amount_1 = $output['amount-1'];
+        $partner_2 = $output['partner-2'];
+        $amount_2 = $output['amount-2'];
+        $partner_3 = $output['partner-3'];
+        $amount_3 = $output['amount-3'];
+
+        $message = array();
+
+        $amount_1 = str_replace('.', '', $amount_1);
+        $amount_2 = str_replace('.', '', $amount_2);
+        $amount_3 = str_replace('.', '', $amount_3);
+
+        $partners = array(
+            $partner_1 => $amount_1,
+            $partner_2 => $amount_2,
+            $partner_3 => $amount_3
+        );
+
+        $contribution = "";
+        foreach ($partners as $key => $value) {
+            $value = str_replace('.', '', $value);
+            //$contribution = Contribution::create(['order_id' => $order_id, 'partner_id' => $key, 'amount' => $value]);
+        }
+
+        if (stripos(json_encode($output), 'tamount') !== false && stripos(json_encode($output), 'item') !== false) {
+            $keys = array();
+            $values = array();
+            foreach ($output as $key => $value) {
+                if (str_starts_with($key, 'item') || str_starts_with($key, 'tamount')) {
+                    //echo $key." - ".$value."\n";
+                    $keys[] = $key;
+                    $values[] = $value;
+                }
+            }
+            if (in_array(null, $values, true) || in_array('', $values, true)) {
+                $message['message'] = 'Data recorded successfully';
+
+                return response()->json($message)->setStatusCode(200);
+            } else {
+                $even = $odd = array();
+                foreach ($values as $k => $v) ($k & 1) === 0 ? $even[] = $v : $odd[] = $v;
+                $stocks = array();
+                foreach ($even as $i => $key) {
+                    $stocks[$key] = $odd[$i];
+                }
+                $transfers = "";
+                foreach ($stocks as $key => $value) {
+                    $value = str_replace('.', '', $value);
+                    $transfers = Transfer::create(['order_id' => $order_id, 'stock_id' => $key, 'amount' => $value]);
+                }
+
+                if ($transfers) {
+                    $message['message'] = 'Data recorded successfully';
+
+                    return response()->json($message)->setStatusCode(200);
+                } else {
+                    $message['message'] = 'Transfer data failed to save';
+
+                    return response()->json($message)->setStatusCode(400);
+                }
+            }
+        } else {
+            $message['message'] = 'Data recorded successfully';
+
+            return response()->json($message)->setStatusCode(200);
+        }
     }
 
 }

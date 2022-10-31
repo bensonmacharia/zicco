@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Contribution extends Model
+class Expense extends Model
 {
     use HasFactory;
 
@@ -14,16 +14,6 @@ class Contribution extends Model
         'created_at',
         'updated_at',
     ];
-
-    public function partner()
-    {
-        return $this->belongsTo(Partner::class);
-    }
-
-    public function order()
-    {
-        return $this->belongsTo(Order::class);
-    }
 
     public function user()
     {

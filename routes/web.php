@@ -39,9 +39,11 @@ Route::group(['middleware' => ['auth']], function() {
     Route::get('admin/order/get-data', [App\Http\Controllers\OrderController::class, 'getData']);
     Route::get('admin/order/get-order/{id}', [App\Http\Controllers\OrderController::class, 'getOrder']);
     Route::get('stock/summary', [App\Http\Controllers\StockController::class, 'summary'])->name('summary');
+    Route::get('stock/soldout', [App\Http\Controllers\StockController::class, 'soldout'])->name('soldout');
     Route::get('stock/load_stock_summary', [App\Http\Controllers\StockController::class, 'load_stock_summary']);
     Route::get('stock/manage', [App\Http\Controllers\StockController::class, 'index'])->name('stock');
     Route::get('admin/stock/get-data', [App\Http\Controllers\StockController::class, 'getData']);
+    Route::get('admin/stock/get-soldout', [App\Http\Controllers\StockController::class, 'getSoldOut']);
     Route::post('admin/stock/save', [App\Http\Controllers\StockController::class, 'store']);
     Route::get('admin/category/get-data', [App\Http\Controllers\CategoryController::class, 'getData']);
     Route::post('admin/category/save', [App\Http\Controllers\CategoryController::class, 'store']);
@@ -53,6 +55,9 @@ Route::group(['middleware' => ['auth']], function() {
     Route::get('admin/guide', [App\Http\Controllers\AdminController::class, 'guide'])->name('guide');
     Route::get('admin/customer/get-data', [App\Http\Controllers\AdminController::class, 'getData']);
     Route::post('admin/customer/save', [App\Http\Controllers\AdminController::class, 'store']);
+    Route::get('expense/manage', [App\Http\Controllers\ExpensesController::class, 'index'])->name('expense');
+    Route::get('admin/expense/get-data', [App\Http\Controllers\ExpensesController::class, 'getData']);
+    Route::post('admin/expense/save', [App\Http\Controllers\ExpensesController::class, 'store']);
     Route::get('sales/manage', [App\Http\Controllers\SalesController::class, 'index'])->name('sales');
     Route::post('admin/sale/save', [App\Http\Controllers\SalesController::class, 'store']);
     Route::get('admin/sale/get-data', [App\Http\Controllers\SalesController::class, 'getData']);

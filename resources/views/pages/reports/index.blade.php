@@ -46,7 +46,7 @@ $config = [
                 <div class="row jumbotron">
                     <div class="col-md-9">
                         <form method="POST" action="{{ url('admin/report/sales/filter') }}" id="formSaleFilter">
-                            <div class="form-group row">  
+                            <div class="form-group row">
                                 <label for="start_date_picker" class="col-sm-2 col-form-label">Select Start Date *</label>
                                 <div class="col-sm-4">
                                     <x-adminlte-date-range id="start_date_picker" name="drSizeMd" igroup-size="md" :config="$config">
@@ -150,7 +150,6 @@ function loadList() {
             {data: 'inv_no', name: 'inv_no'},
             {data: 'date_added', name: 'date_added'},
         ],
-        responsive: true,
         oLanguage: {
             sLengthMenu: "_MENU_",
             sSearch: ""
@@ -179,13 +178,13 @@ function loadList() {
             // I need a footer in my table before doing this, what is the smartest way to add the footer?
             $(api.column(5).footer()).html(
                 total_price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-            );     
+            );
             $(api.column(6).footer()).html(
                 paid.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-            ); 
+            );
             $(api.column(7).footer()).html(
                 balance.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-            ); 
+            );
         }
     });
 
@@ -251,13 +250,13 @@ function getSaleByDate()
                 // I need a footer in my table before doing this, what is the smartest way to add the footer?
                 $(api.column(5).footer()).html(
                     total_price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                );     
+                );
                 $(api.column(6).footer()).html(
                     paid.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                ); 
+                );
                 $(api.column(7).footer()).html(
                     balance.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                ); 
+                );
             }
         });
     }

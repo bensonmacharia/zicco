@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Order extends Model
+class Contribution extends Model
 {
     use HasFactory;
 
@@ -15,9 +15,14 @@ class Order extends Model
         'updated_at',
     ];
 
-    public function product()
+    public function partner()
     {
-        return $this->belongsTo(Product::class);
+        return $this->belongsTo(Partner::class);
+    }
+
+    public function order()
+    {
+        return $this->belongsTo(Order::class);
     }
 
     public function user()

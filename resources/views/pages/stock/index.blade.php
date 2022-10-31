@@ -61,11 +61,21 @@
                         <input type="hidden" id="id" name="id">
                         <label for="order_id" class="col-sm-3 col-form-label">Order *</label>
                         <div class="col-sm-9">
-                            <select class="form-control select2" id="order_id" name="order_id" style="width:50%">
+                            <select class="form-control select2" id="order_id" name="order_id" style="width:80%">
                                 <option value=''>--Select--</option>
                                 @foreach($order as $row)
                                 <option value="{{ $row->id }}">{{ "Batch ".$row->batch." - ".$row->product->name }}</option>
                                 @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="order_id" class="col-sm-3 col-form-label">Sold Out *</label>
+                        <div class="col-sm-9">
+                            <select class="form-control select2" id="soldout" name="soldout" style="width:80%">
+                                <option value=''>--Select--</option>
+                                <option value="1">Yes</option>
+                                <option value="0">No</option>
                             </select>
                         </div>
                     </div>
@@ -187,12 +197,12 @@
                                     data-tcost = \''+row.tcost+'\' \
                                     data-order_id = '+row.order_id+' \
                                     data-product_id = '+row.product_id+' \
+                                    data-soldout = '+row.soldout+' \
                                 onclick="editStock(this)" data-toggle="modal" data-target="#InputModal"><i class="fa fa-edit"></i> edit</a>&nbsp;';
                         return result;
                     }
                 }
             ],
-            responsive: true,
             oLanguage: {
                 sLengthMenu: "_MENU_",
                 sSearch: ""
@@ -239,6 +249,7 @@
         $('#tcost').val($(e).data('tcost'));
         $('#order_id').val($(e).data('order_id'));
         $('#product_id').val($(e).data('product_id'));
+        $('#soldout').val($(e).data('soldout'));
 
         $('.alert').hide();
     }
@@ -246,6 +257,7 @@
     function saveStock() {
         let id = document.getElementById('id').value;
         let order_id = $('#order_id').val();
+        let soldout = $('#soldout').val();
         let batch = document.getElementById('batch').value;
         let units = document.getElementById('units').value;
         let pcost = document.getElementById('pcost').value;
@@ -271,6 +283,7 @@
             var form_data = new FormData();
             form_data.append('id', id);
             form_data.append('order_id', order_id);
+            form_data.append('soldout', soldout);
             form_data.append('batch', batch);
             form_data.append('units', units);
             form_data.append('pcost', pcost);

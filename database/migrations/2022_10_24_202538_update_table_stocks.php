@@ -16,6 +16,7 @@ class UpdateTableStocks extends Migration
         Schema::table('stocks', function (Blueprint $table) {
             $table->unsignedBigInteger('order_id');
             $table->integer('batch');
+            $table->tinyInteger('soldout')->default('0');
             $table->renameColumn('cost', 'pcost');
             $table->double('ccost');
             $table->double('tcost');

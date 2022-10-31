@@ -105,7 +105,6 @@ function loadList() {
                                     data-id = '+row.id+' \
                                     data-name =  \''+row.name+'\' \
                                 onclick="editCategory(this)" data-toggle="modal" data-target="#InputModal"><i class="fa fa-edit"></i> edit</a>&nbsp;';
-                    result += '<a class="btn btn-warning btn-sm" onclick="destroy('+row.id+')"><i class="fa fa-trash"></i> delete</a>';
                         return result;
                 }
             }

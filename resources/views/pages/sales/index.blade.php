@@ -35,7 +35,6 @@
                             <th>Paid</th>
                             <th>Balance</th>
                             <th>Receipt</th>
-                            <th>Invoice</th>
                             <th>Date</th>
                             <th>Action</th>
                         </tr>
@@ -176,7 +175,6 @@ function loadList() {
             {data: 'paid', name: 'paid'},
             {data: 'balance', name: 'balance'},
             {data: 'rcpt_no', name: 'rcpt_no'},
-            {data: 'inv_no', name: 'inv_no'},
             {data: 'date_added', name: 'date_added'},
             { "data": null,"sortable": false,
                 render: function (data, type, row, meta) {
@@ -188,9 +186,7 @@ function loadList() {
                                     data-price = '+row.price+' \
                                     data-amnt_paid = '+row.amnt_paid+' \
                                     data-rcpt_no = \''+row.rcpt_no+'\' \
-                                    data-inv_no = \''+row.inv_no+'\' \
                                 onclick="editSale(this)" data-toggle="modal" data-target="#InputModal"><i class="fa fa-edit"></i> edit</a>&nbsp;';
-                    result += '<a class="btn btn-warning btn-sm" onclick="destroy('+row.id+')"><i class="fa fa-trash"></i> delete</a>';
                         return result;
                 }
             }

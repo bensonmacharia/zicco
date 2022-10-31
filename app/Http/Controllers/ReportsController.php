@@ -15,7 +15,7 @@ class ReportsController extends Controller
         $customer = Customer::all();
         return view('pages/reports/index', compact('product', 'customer'));
     }
-    
+
     public function customer_sales() {
         $product = Product::all();
         $customer = Customer::all();
@@ -58,7 +58,7 @@ class ReportsController extends Controller
                         ->addIndexColumn()
                         ->make(true);
     }
-    
+
     public function today() {
         //$data = Sales::all()->sortByDesc('created_at')->values();
         $now = Carbon::now();
@@ -90,9 +90,9 @@ class ReportsController extends Controller
                         ->addIndexColumn()
                         ->make(true);
     }
-    
+
     public function salesByDate($start, $end){
-        
+
         $data = Sales::whereBetween('updated_at',   [$start." 00:00:00",$end." 23:59:59"])->get();
 
         return datatables()->of($data)
@@ -127,10 +127,10 @@ class ReportsController extends Controller
                         ->addIndexColumn()
                         ->make(true);
     }
-    
+
     public function salesByCustomer($customer){
         $data = Sales::where('customer_id', $customer)->get();
-        
+
         return datatables()->of($data)
                         ->addColumn('product', function ($data) {
                             return isset($data->product->name) ? $data->product->name : '';

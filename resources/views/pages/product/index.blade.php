@@ -188,7 +188,6 @@ function loadList() {
                                     data-category_id = '+row.category_id+' \
                                     data-image = '+row.image+' \
                                 onclick="editProduct(this)" data-toggle="modal" data-target="#InputModal"><i class="fa fa-edit"></i> edit</a>&nbsp;';
-                    result += '<a class="btn btn-warning btn-sm" onclick="destroy('+row.id+')"><i class="fa fa-trash"></i> delete</a>';
                         return result;
                 }
             }
