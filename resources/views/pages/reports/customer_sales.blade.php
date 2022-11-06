@@ -158,16 +158,15 @@ function getSaleByCustomerDefault()
                     paid += (x['paid']);
                     balance += (x['balance']);
                 });
-                // I need a footer in my table before doing this, what is the smartest way to add the footer?
                 $(api.column(5).footer()).html(
                     total_price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                );     
+                );
                 $(api.column(6).footer()).html(
                     paid.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                ); 
+                );
                 $(api.column(7).footer()).html(
                     balance.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                ); 
+                );
             }
         });
     }
@@ -230,13 +229,13 @@ function getSaleByCustomer()
                 // I need a footer in my table before doing this, what is the smartest way to add the footer?
                 $(api.column(5).footer()).html(
                     total_price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                );     
+                );
                 $(api.column(6).footer()).html(
                     paid.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                ); 
+                );
                 $(api.column(7).footer()).html(
                     balance.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                ); 
+                );
             }
         });
     }

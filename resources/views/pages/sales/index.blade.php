@@ -60,12 +60,12 @@
                 <div class="modal-body">
                     <div class="form-group row">
                         <input type="hidden" id="id" name="id">
-                        <label for="product_id" class="col-sm-3 col-form-label">Product *</label>
+                        <label for="stock_id" class="col-sm-3 col-form-label">Product *</label>
                         <div class="col-sm-9">
-                            <select class="form-control select2" id="product_id" name="product_id" style="width:50%">
+                            <select class="form-control select2" id="stock_id" name="stock_id" style="width:50%">
                                 <option value=''>--Select--</option>
-                                @foreach($product as $row)
-                                <option value="{{ $row->id }}">{{ $row->name }}</option>
+                                @foreach($stock as $row)
+                                <option value="{{ $row->id }}">{{ $row->batch." - ".$row->product->name }}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -181,7 +181,7 @@ function loadList() {
                     var result = '<a class="btn btn-success btn-sm" \
                                     data-id = '+row.id+' \
                                     data-customer_id = '+row.customer_id+' \
-                                    data-product_id = '+row.product_id+' \
+                                    data-stock_id = '+row.stock_id+' \
                                     data-units = '+row.units+' \
                                     data-price = '+row.price+' \
                                     data-amnt_paid = '+row.amnt_paid+' \
@@ -191,7 +191,6 @@ function loadList() {
                 }
             }
         ],
-        responsive: true,
         oLanguage: {
             sLengthMenu: "_MENU_",
             sSearch: ""
@@ -212,7 +211,7 @@ function loadList() {
 
 function editSale(e) {
         $('#id').val($(e).data('id'));
-        $('#product_id').val($(e).data('product_id')).trigger('change');
+        $('#stock_id').val($(e).data('stock_id')).trigger('change');
         $('#units').val($(e).data('units'));
         $('#price').val($(e).data('price'));
         $('#customer_id').val($(e).data('customer_id')).trigger('change');
@@ -226,7 +225,7 @@ function editSale(e) {
   function saveSale()
   {
     let id = document.getElementById('id').value;
-    let product_id = $('#product_id').val();
+    let stock_id = $('#stock_id').val();
     let units = document.getElementById('units').value;
     let price = document.getElementById('price').value;
     let customer_id = $('#customer_id').val();
@@ -243,7 +242,7 @@ function editSale(e) {
            document.getElementById("submitSale").disabled = true;
             var form_data = new FormData();
                 form_data.append('id', id);
-                form_data.append('product_id', product_id);
+                form_data.append('stock_id', stock_id);
                 form_data.append('units', units);
                 form_data.append('price', price);
                 form_data.append('customer_id', customer_id);
@@ -323,7 +322,7 @@ function editSale(e) {
 
 function resetForm(){
     $('#id').val('');
-    $('#product_id').val('').trigger('change');
+    $('#stock_id').val('').trigger('change');
     $('#units').val('');
     $('#price').val('');
     $('#customer_id').val('').trigger('change');

@@ -1,9 +1,9 @@
 @extends('adminlte::page')
 
-@section('title', 'Record Stock')
+@section('title', 'Manage Stock')
 
 @section('content_header')
-<h1>Record Stock</h1>
+<h1>Manage Stock</h1>
 @stop
 
 @section('content')
@@ -137,6 +137,63 @@
         </div>
     </div>
 </div>
+<!-- #DetailsModal -->
+<div class="modal fade" id="DetailsModal" aria-labelledby="InputModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="InputModalLabel"></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h5>Sales</h5>
+                <div class="table-responsive mt-4">
+                    <table id="sales" class="table table-bordered table-striped">
+                        <thead>
+                        <tr>
+                            <th>Expected Sales</th>
+                            <th>Actual Sales</th>
+                            <th>Expected Profit</th>
+                            <th>Actual Profit</th>
+                            <th>System Profit</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td id="expected_sales"></td>
+                            <td id="actual_sales"></td>
+                            <td id="expected_profit"></td>
+                            <td id="actual_profit"></td>
+                            <td id="system_profit"></td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <br/>
+                <h5>Transfers</h5>
+                <div class="table-responsive mt-4">
+                    <table id="transfers" class="table table-bordered table-striped">
+                        <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Transferred to</th>
+                            <th>Batch</th>
+                            <th>Amount</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
 @stop
 
 @section('css')
@@ -158,6 +215,8 @@
             }
         });
         loadList();
+
+        $("#transfers").append('<tfoot><tr><th></th><th></th><th></th><th></th></tr></tfoot>');
 
         $('#order_id').on("change", function (e) {
             //console.log($(this).val());
@@ -198,7 +257,24 @@
                                     data-order_id = '+row.order_id+' \
                                     data-product_id = '+row.product_id+' \
                                     data-soldout = '+row.soldout+' \
-                                onclick="editStock(this)" data-toggle="modal" data-target="#InputModal"><i class="fa fa-edit"></i> edit</a>&nbsp;';
+                                onclick="editStock(this)" data-toggle="modal" data-target="#InputModal"><i class="fa fa-edit"></i></a>&nbsp;&nbsp;';
+                        result += '<a class="btn btn-info btn-sm" \
+                                    data-id = '+row.id+' \
+                                    data-batch = \''+row.batch+'\' \
+                                    data-units = '+row.units+' \
+                                    data-pcost = \''+row.pcost+'\' \
+                                    data-ccost = \''+row.ccost+'\' \
+                                    data-tcost = \''+row.tcost+'\' \
+                                    data-order_id = '+row.order_id+' \
+                                    data-product_id = '+row.product_id+' \
+                                    data-product_name = \''+row.product_name+'\' \
+                                    data-actual_sales = \''+row.actual_sales+'\' \
+                                    data-expected_sales = \''+row.expected_sales+'\' \
+                                    data-actual_profit = \''+row.actual_profit+'\' \
+                                    data-expected_profit = \''+row.expected_profit+'\' \
+                                    data-system_profit = \''+row.system_profit+'\' \
+                                    data-soldout = '+row.soldout+' \
+                                onclick="viewStockDetails(this)" data-toggle="modal" data-target="#DetailsModal"><i class="fa fa-eye"></i></a>';
                         return result;
                     }
                 }
@@ -247,9 +323,9 @@
         $('#pcost').val($(e).data('pcost'));
         $('#ccost').val($(e).data('ccost'));
         $('#tcost').val($(e).data('tcost'));
-        $('#order_id').val($(e).data('order_id'));
-        $('#product_id').val($(e).data('product_id'));
-        $('#soldout').val($(e).data('soldout'));
+        //$('#order_id').val($(e).data('id'));
+        $('#order_id').val($(e).data('id')).trigger('change');
+        $('#soldout').val($(e).data('soldout')).trigger('change');
 
         $('.alert').hide();
     }
@@ -319,6 +395,73 @@
 
             });
         }
+    }
+
+    function viewStockDetails(e) {
+        $('#id').val($(e).data('id'));
+        $('#batch').val($(e).data('batch'));
+        $('#units').val($(e).data('units'));
+        $('#pcost').val($(e).data('pcost'));
+        $('#ccost').val($(e).data('ccost'));
+        $('#tcost').val($(e).data('tcost'));
+        $('#order_id').val($(e).data('order_id'));
+        $('#product_id').val($(e).data('product_id'));
+        $('#soldout').val($(e).data('soldout'));
+
+        $('.alert').hide();
+
+        //console.log($(e).data('product_name'));
+        $('#InputModalLabel').html($(e).data('product_name'));
+        $('#expected_sales').html($(e).data('expected_sales'));
+        $('#actual_sales').html($(e).data('actual_sales'));
+        $('#expected_profit').html($(e).data('expected_profit'));
+        $('#actual_profit').html($(e).data('actual_profit'));
+        $('#system_profit').html($(e).data('system_profit'));
+        //document.querySelector('#InputModalLabel').innerHTML = $(e).data('product_name').split(' ').join('-');
+
+        $('#sales').DataTable({
+            "autoWidth": false,
+            "responsive": true,
+            "bPaginate": false,
+            "bFilter": false,
+            "bInfo": false
+        });
+
+        loadStockTransfers($(e).data('id'));
+    }
+
+    function loadStockTransfers(stock_id){
+        const trn_url = "{{ url('admin/stock/get-stock-transfers')}}"+"/"+stock_id;
+        //console.log(trn_url);
+        $.fn.dataTable.ext.errMode = 'ignore';
+        $('#transfers').DataTable().destroy();
+        $('#transfers tbody').empty();
+        var table = $('#transfers').DataTable({
+            "autoWidth": false,
+            "responsive": true,
+            "bPaginate": false,
+            "bFilter": false,
+            "bInfo": false,
+            ajax: {
+                url: trn_url,
+            },
+            columns: [
+                {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false},
+                {data: 'product_name', name: 'product_name'},
+                {data: 'batch', name: 'batch'},
+                {data: 'amount', name: 'amount'}
+            ],
+            fnFooterCallback: function(nRow, aaData, iStart, iEnd, aiDisplay) {
+                var api = this.api();
+                var total_amount = 0;
+                aaData.forEach(function(x) {
+                    total_amount += (x['amount']);
+                });
+                $(api.column(3).footer()).html(
+                    total_amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                );
+            }
+        });
     }
 
     function resetForm() {

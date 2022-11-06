@@ -127,12 +127,23 @@
                         </div>
                     </div>
                     <div class="form-group row">
-                        <label for="esale" class="col-sm-3 col-form-label">Total Sales *</label>
+                        <label for="esale" class="col-sm-3 col-form-label">Estimated Sales *</label>
                         <div class="col-sm-8">
                             <div class="input-group mb-3">
                                 <span class="input-group-text">KES</span>
                                 <input type="text" autocomplete="off" class="form-control numeral-mask" id="esale"
                                        name="esale" placeholder="Estimated total sales" required>
+                                <span class="input-group-text">.00</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="asale" class="col-sm-3 col-form-label">Actual Sales </label>
+                        <div class="col-sm-8">
+                            <div class="input-group mb-3">
+                                <span class="input-group-text">KES</span>
+                                <input type="text" autocomplete="off" class="form-control numeral-mask" id="asale"
+                                       name="asale" placeholder="Actual total sales" required>
                                 <span class="input-group-text">.00</span>
                             </div>
                         </div>
@@ -215,7 +226,7 @@
                                                         style="width:100%">
                                                     <option value=''>--Select Product--</option>
                                                     @foreach($stock as $row)
-                                                    <option value="{{ $row->id }}">{{ $row->batch." - ".$row->name }}</option>
+                                                    <option value="{{ $row->id }}">{{ $row->batch." - ".$row->product->name }}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -306,6 +317,7 @@
                                     data-ccost = \''+row.ccost+'\' \
                                     data-tcost = \''+row.tcost+'\' \
                                     data-esale = \''+row.esale+'\' \
+                                    data-asale = \''+row.asale+'\' \
                                     data-payment = '+row.payment+' \
                                     data-product_id = '+row.product_id+' \
                                 onclick="editOrder(this)" data-toggle="modal" data-target="#InputModal"><i class="fa fa-edit"></i></a>&nbsp;';
@@ -323,7 +335,6 @@
                     }
                 }
             ],
-            responsive: true,
             oLanguage: {
                 sLengthMenu: "_MENU_",
                 sSearch: ""
@@ -349,6 +360,7 @@
         $('#ccost').val($(e).data('ccost'));
         $('#tcost').val($(e).data('tcost'));
         $('#esale').val($(e).data('esale'));
+        $('#asale').val($(e).data('asale'));
         $('#product_id').val($(e).data('product_id')).trigger('change');
         $('#payment').val($(e).data('payment')).trigger('change');
 
@@ -356,24 +368,62 @@
     }
 
     function editPayment(e) {
+        const cont_url = "{{ url('admin/order/get-contributions')}}"+"/"+$(e).data('id');
         $('#formPayment').trigger("reset");
+        $('#amount-1').val('');
+        $('#amount-2').val('');
+        $('#amount-3').val('');
+        $.ajax({
+            url: cont_url,
+            type: 'GET',
+            dataType: 'json',
+            success: function(res) {
+                //console.log(res);
+                $('#amount-1').val(res[0].amounts.split('-')[0]);
+                $('#amount-2').val(res[0].amounts.split('-')[1]);
+                $('#amount-3').val(res[0].amounts.split('-')[2]);
+            }
+        });
         var cost = $(e).data('pcost') + $(e).data('ccost') + $(e).data('tcost') ;
         $('#order_id').val($(e).data('id'));
         $('#payment_type_id').val($(e).data('payment'));
         $('#product_cost').val($(e).data('scost'));
-        $('#amount-1').val(cost/2);
-        $('#amount-2').val(cost/2);
-        $('#amount-3').val(0);
 
         var pyt = document.getElementById('payment_type_id').value;
         //console.log(pyt);
         if (pyt === '1' ){
             $("#transferDiv").removeClass('d-none');
+            loadTransfers($(e).data('id'));
         } else {
             $("#transferDiv").addClass('d-none');
         }
 
         $('.alert').hide();
+    }
+
+    function loadTransfers(order_id){
+        const trans_url = "{{ url('admin/order/get-transfers')}}"+"/"+order_id;
+        $.ajax({
+            url: trans_url,
+            type: 'GET',
+            dataType: 'json',
+            success: function(res) {
+                //console.log(res);
+                if(Array.isArray(res) && res.length) {
+                    let prodArray = res[0].products.split('-');
+                    let amntArray = res[0].amounts.split('-');
+                    if (Array.isArray(prodArray) || amntArray.length) {
+                        $('#item').val(prodArray[0]).trigger('change');
+                        $('#tamount').val(amntArray[0]);
+                        if (prodArray.length > 1) {
+                            let count = prodArray.length - 1
+                            addRowEdit(count, prodArray, amntArray);
+                        }
+                    }
+                }
+                //console.log(prodArray.length);
+            }
+        });
     }
 
     function saveOrder() {
@@ -386,6 +436,7 @@
         let ccost = document.getElementById('ccost').value;
         let tcost = document.getElementById('tcost').value;
         let esale = document.getElementById('esale').value;
+        let asale = document.getElementById('asale').value;
 
         var url = "{{ url('admin/order/save') }}";
 
@@ -414,6 +465,7 @@
             form_data.append('ccost', ccost);
             form_data.append('tcost', tcost);
             form_data.append('esale', esale);
+            form_data.append('asale', asale);
 
             $.ajax({
                 type: "POST",
@@ -484,25 +536,54 @@
         $('#ccost').val('');
         $('#tcost').val('');
         $('#esale').val('');
+        $('#asale').val('');
         $('#input').val('');
         $('#product_id').val('').trigger('change');
         $('#payment').val('').trigger('change');
         $('.alert').hide();
         $('#formOrder').trigger("reset");
     }
+
     var clicks = 0;
     function addRow(){
         clicks += 1;
         //console.log(clicks);
         //Add row
         row = '';
-        row += '<tr><td><div class="form-group"><select class="form-control select2" id="item_id" name="item_id" style="width:100%"><option value="">--Select Product--</option>@foreach($stock as $row)<option value="{{ $row->id }}">{{ $row->batch." - ".$row->name }}</option>@endforeach </select></div></td><td><div class="form-group"><div class="input-group mb-3"><span class="input-group-text">KES</span><input type="text" autocomplete="off" class="form-control numeral-mask" id="tamount_id" name="tamount_id" placeholder="Amount" required><span class="input-group-text">.00</span></div></div></td>';
+        row += '<tr><td><div class="form-group"><select class="form-control select2" id="item_id" name="item_id" style="width:100%"><option value="">--Select Product--</option>@foreach($stock as $row)<option value="{{ $row->id }}">{{ $row->batch." - ".$row->product->name }}</option>@endforeach </select></div></td><td><div class="form-group"><div class="input-group mb-3"><span class="input-group-text">KES</span><input type="text" autocomplete="off" class="form-control numeral-mask" id="tamount_id" name="tamount_id" placeholder="Amount" required><span class="input-group-text">.00</span></div></div></td>';
         row += '<td><button class="btn btn-outline-danger delete_row"><i class="fa fa-trash"></i></button></td></tr>';
         $('#item_id').attr('name', 'item_id_'+clicks);
         $('#item_id').attr('id', 'item_id_'+clicks);
         $('#tamount_id').attr('name', 'tamount_id_'+clicks);
         $('#tamount_id').attr('id', 'tamount_id_'+clicks);
         $("#add_table").append(row);
+    }
+
+    function addRowEdit(count, prodArray, amntArray){
+        //console.log(count);
+        //$("#add_table").closest('tr').remove();
+        //$("#add_table tr").remove();
+        var x = document.getElementById("add_table").rows.length;
+        //console.log(x);
+        if(x <= prodArray.length){
+            for (let i = 1; i <= count; i++){
+                //console.log(i+" - "+prodArray[i]);
+                //Add row
+                row = '';
+                row += '<tr><td><div class="form-group"><select class="form-control select2" id="item_id" name="item_id" style="width:100%"><option value="">--Select Product--</option>@foreach($stock as $row)<option value="{{ $row->id }}">{{ $row->batch." - ".$row->product->name }}</option>@endforeach </select></div></td><td><div class="form-group"><div class="input-group mb-3"><span class="input-group-text">KES</span><input type="text" autocomplete="off" class="form-control numeral-mask" id="tamount_id" name="tamount_id" placeholder="Amount" required><span class="input-group-text">.00</span></div></div></td>';
+                row += '<td><button class="btn btn-outline-danger delete_row"><i class="fa fa-trash"></i></button></td></tr>';
+                $('#item_id').attr('name', 'item_id_'+i);
+                $('#item_id').attr('id', 'item_id_'+i);
+                $('#tamount_id').attr('name', 'tamount_id_'+i);
+                $('#tamount_id').attr('id', 'tamount_id_'+i);
+                $("#add_table").append(row);
+                $('#item_id_'+i).val(prodArray[i]).trigger('change');
+                $('#tamount_id_'+i).val(amntArray[i]);
+            }
+        }
+        $('#item_id').val(prodArray[1]).trigger('change');
+        $('#tamount_id').val(amntArray[1]);
+        //console.log(document.getElementById("item_id_"+2));
     }
 </script>
 <script>

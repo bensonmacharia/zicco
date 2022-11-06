@@ -18,11 +18,19 @@ class OrderController extends Controller
     public function index()
     {
         $product = Product::all()->sortBy('name')->values();
-        $stock = Stock::all()->sortBy('name')->values();
-        $stock = DB::table('orders')
-            ->join('products', 'products.id', '=', 'orders.product_id')
-            ->select('*')
-            ->get();
+        $stock = Stock::all()->sortBy('product.name')->values();
+        /*$stock = DB::table('stocks')
+            ->join('orders', 'orders.id', '=', 'stocks.order_id')
+            ->join('products', 'products.id', '=', 'stocks.product_id')
+            ->select('stocks.*','products.name','stocks.batch')
+            ->get();*/
+        /*$data = Order::select(['orders.*','ps1.*'])
+            ->joinSub($subQuery->toSql(), 'ps1', function ($join) {
+                $join->on('ps1.order_id', '=', 'orders.id');
+            })
+            ->orderBy('orders.created_at', 'desc')
+            ->get();*/
+
         $partner = Partner::all()->sortBy('id')->values();
         return view('pages/orders/index', compact('product', 'partner', 'stock'));
     }
@@ -73,8 +81,12 @@ class OrderController extends Controller
             ->addColumn('profitability', function ($data) {
                 $total_cost = $data->pcost + $data->ccost + $data->tcost;
                 $eprofit = $data->esale - $total_cost;
-                $nprofit = (90 / 100) * $eprofit;;
-                return ($nprofit / $data->esale) * 100;
+                $nprofit = (90 / 100) * $eprofit;
+                if($data->esale){
+                    return ($nprofit / $data->esale) * 100;
+                } else {
+                    return ($nprofit / 1) * 100;
+                }
             })
             ->addColumn('added_by', function ($data) {
                 return isset($data->user->username) ? $data->user->username : '';
@@ -90,6 +102,24 @@ class OrderController extends Controller
     {
         $data = Order::where('id', $id)->get();
         return $data;
+    }
+
+    public function getContributions($id)
+    {
+        $contributions = DB::table('contributions')
+            ->select('order_id',DB::raw("GROUP_CONCAT(amount SEPARATOR '-') as amounts"), DB::raw("GROUP_CONCAT(partner_id SEPARATOR '-') as partners"))
+            ->groupBy('order_id')
+            ->where('order_id', $id)->get();
+        return $contributions;
+    }
+
+    public function getTransfers($id)
+    {
+        $transfers = DB::table('transfers')
+            ->select('order_id',DB::raw("GROUP_CONCAT(amount SEPARATOR '-') as amounts"), DB::raw("GROUP_CONCAT(stock_id SEPARATOR '-') as products"))
+            ->groupBy('order_id')
+            ->where('order_id', $id)->get();
+        return $transfers;
     }
 
     public function store(Request $req)
@@ -110,6 +140,12 @@ class OrderController extends Controller
             $data_input['updated_at'] = date('Y-m-d H:i:s');
         } else {
             $data_input['created_at'] = date('Y-m-d H:i:s');
+        }
+
+        if($data_input['asale']){
+            $data_input['asale'] = str_replace('.', '', $data_input['asale']);
+        } else {
+            $data_input['asale'] = 0;
         }
         $data_input['pcost'] = str_replace('.', '', $data_input['pcost']);
         $data_input['ccost'] = str_replace('.', '', $data_input['ccost']);
@@ -155,12 +191,27 @@ class OrderController extends Controller
             $partner_3 => $amount_3
         );
 
+        $exists = Contribution::where('order_id', $order_id)->get();
         $contribution = "";
-        foreach ($partners as $key => $value) {
-            $value = str_replace('.', '', $value);
-            //$contribution = Contribution::create(['order_id' => $order_id, 'partner_id' => $key, 'amount' => $value]);
+        if($exists){
+            foreach ($partners as $key => $value) {
+                $value = str_replace('.', '', $value);
+                $data_input['updated_at'] = date('Y-m-d H:i:s');
+                $data_input['amount'] = $value;
+                $contribution = Contribution::updateOrCreate(['order_id' => $order_id, 'partner_id' => $key], $data_input);
+            }
+        } else {
+            foreach ($partners as $key => $value) {
+                $value = str_replace('.', '', $value);
+                $data_input['created_at'] = date('Y-m-d H:i:s');
+                $data_input['order_id'] = $order_id;
+                $data_input['partner_id'] = $key;
+                $data_input['amount'] = $value;
+                $contribution = Contribution::updateOrCreate(['order_id' => $order_id, 'partner_id' => $key], $data_input);
+            }
         }
 
+        $recorded = Transfer::where('order_id', $order_id)->get();
         if (stripos(json_encode($output), 'tamount') !== false && stripos(json_encode($output), 'item') !== false) {
             $keys = array();
             $values = array();
@@ -183,9 +234,22 @@ class OrderController extends Controller
                     $stocks[$key] = $odd[$i];
                 }
                 $transfers = "";
-                foreach ($stocks as $key => $value) {
-                    $value = str_replace('.', '', $value);
-                    $transfers = Transfer::create(['order_id' => $order_id, 'stock_id' => $key, 'amount' => $value]);
+                if($recorded){
+                    foreach ($stocks as $key => $value) {
+                        $value = str_replace('.', '', $value);
+                        $data_input['updated_at'] = date('Y-m-d H:i:s');
+                        $data_input['amount'] = $value;
+                        $transfers = Transfer::updateOrCreate(['order_id' => $order_id, 'stock_id' => $key], $data_input);
+                    }
+                } else {
+                    foreach ($stocks as $key => $value) {
+                        $value = str_replace('.', '', $value);
+                        $data_input['created_at'] = date('Y-m-d H:i:s');
+                        $data_input['order_id'] = $order_id;
+                        $data_input['stock_id'] = $key;
+                        $data_input['amount'] = $value;
+                        $transfers = Transfer::updateOrCreate(['order_id' => $order_id, 'stock_id' => $key], $data_input);
+                    }
                 }
 
                 if ($transfers) {

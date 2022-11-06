@@ -38,12 +38,17 @@ Route::group(['middleware' => ['auth']], function() {
     Route::post('admin/order/payment', [App\Http\Controllers\OrderController::class, 'payment']);
     Route::get('admin/order/get-data', [App\Http\Controllers\OrderController::class, 'getData']);
     Route::get('admin/order/get-order/{id}', [App\Http\Controllers\OrderController::class, 'getOrder']);
+    Route::get('admin/order/get-contributions/{id}', [App\Http\Controllers\OrderController::class, 'getContributions']);
+    Route::get('admin/order/get-transfers/{id}', [App\Http\Controllers\OrderController::class, 'getTransfers']);
     Route::get('stock/summary', [App\Http\Controllers\StockController::class, 'summary'])->name('summary');
+    Route::get('stock/aggregate', [App\Http\Controllers\StockController::class, 'aggregate'])->name('aggregate');
     Route::get('stock/soldout', [App\Http\Controllers\StockController::class, 'soldout'])->name('soldout');
     Route::get('stock/load_stock_summary', [App\Http\Controllers\StockController::class, 'load_stock_summary']);
+    Route::get('stock/load_stock_aggregate', [App\Http\Controllers\StockController::class, 'load_stock_aggregate']);
     Route::get('stock/manage', [App\Http\Controllers\StockController::class, 'index'])->name('stock');
     Route::get('admin/stock/get-data', [App\Http\Controllers\StockController::class, 'getData']);
     Route::get('admin/stock/get-soldout', [App\Http\Controllers\StockController::class, 'getSoldOut']);
+    Route::get('admin/stock/get-stock-transfers/{id}', [App\Http\Controllers\StockController::class, 'getStockTransfers']);
     Route::post('admin/stock/save', [App\Http\Controllers\StockController::class, 'store']);
     Route::get('admin/category/get-data', [App\Http\Controllers\CategoryController::class, 'getData']);
     Route::post('admin/category/save', [App\Http\Controllers\CategoryController::class, 'store']);
@@ -59,6 +64,7 @@ Route::group(['middleware' => ['auth']], function() {
     Route::get('admin/expense/get-data', [App\Http\Controllers\ExpensesController::class, 'getData']);
     Route::post('admin/expense/save', [App\Http\Controllers\ExpensesController::class, 'store']);
     Route::get('sales/manage', [App\Http\Controllers\SalesController::class, 'index'])->name('sales');
+    Route::get('admin/sale/update-stock-sales', [App\Http\Controllers\SalesController::class, 'updateStockSales']);
     Route::post('admin/sale/save', [App\Http\Controllers\SalesController::class, 'store']);
     Route::get('admin/sale/get-data', [App\Http\Controllers\SalesController::class, 'getData']);
     Route::post('admin/sale/destroy/{id}', [App\Http\Controllers\SalesController::class, 'destroy']);

@@ -7,12 +7,13 @@ use App\Models\Sales;
 use App\Models\Product;
 use App\Models\Order;
 use App\Models\Stock;
+use Illuminate\Support\Facades\DB;
 
 class StockController extends Controller {
 
     public function index() {
         $product = Product::all()->sortBy('name')->values();
-        $order = Order::all()->sortBy('id')->values();
+        $order = Order::all()->sortBy('product.name')->values();
         return view('pages/stock/index', compact('product', 'order'));
     }
 
@@ -21,22 +22,32 @@ class StockController extends Controller {
         return view('pages/stock/summary', compact('product'));
     }
 
-    public function load_stock_summary() {
-        $subQuery = Stock::groupBy('stocks.product_id')
-                ->join('products', 'products.id', '=', 'stocks.product_id')
-                ->select('products.id', 'products.name as product_name')
-                ->selectRaw('SUM(stocks.units) as total_units');
+    public function aggregate() {
+        $product = Product::all()->sortBy('name')->values();
+        return view('pages/stock/aggregate', compact('product'));
+    }
 
-        $data = Sales::select(['ps.id as product_id', 'ps.product_name', 'ps.total_units'])
-                ->joinSub($subQuery->toSql(), 'ps', function ($join) {
-                    $join->on('ps.id', '=', 'sales.product_id');
-                })
-                ->selectRaw('SUM(sales.units) total_sold')
-                ->selectRaw('SUM(sales.total_price) total_sales')
-                ->selectRaw('SUM(sales.amnt_paid) total_paid')
-                ->groupBy('ps.id')
-                ->orderBy('ps.product_name', 'asc')
-                ->get();
+    public function load_stock_aggregate() {
+        $subQuery = Stock::select('products.id as product_id', 'products.name as product_name')
+            ->selectRaw('SUM(stocks.units) as total_units')
+            ->join('products', 'products.id', '=', 'stocks.product_id')
+            ->groupBy('products.id')
+            ->groupBy('products.name');
+
+        $data = Sales::select('ps.product_id', 'ps.product_name','ps.total_units')
+            ->join('products', 'products.id', '=', 'sales.product_id')
+            ->joinSub($subQuery->toSql(), 'ps', function ($join) {
+                $join->on('ps.product_id', '=', 'sales.product_id');
+            })
+            ->selectRaw('SUM(sales.units) total_sold')
+            ->selectRaw('SUM(sales.total_price) total_sales')
+            ->selectRaw('SUM(sales.amnt_paid) total_paid')
+            ->groupBy('ps.product_id')
+            ->get();
+
+        /*return datatables()->of($data)
+            ->addIndexColumn()
+            ->make(true);*/
 
 
         return datatables()->of($data)
@@ -74,6 +85,63 @@ class StockController extends Controller {
                         ->make(true);
     }
 
+    public function load_stock_summary() {
+        $transfer = DB::table('transfers')
+            ->join('stocks', 'stocks.id', '=', 'transfers.stock_id')
+            ->join('products', 'products.id', '=', 'stocks.product_id')
+            ->select('products.name', 'stocks.id as stock_id', 'stocks.batch')
+            ->selectRaw('SUM(transfers.amount) total_transferred')
+            ->groupBy('transfers.stock_id');
+
+        $summary = DB::table('stocks')
+            ->join('orders', 'orders.id', '=', 'stocks.order_id')
+            ->leftJoin('sales', 'sales.stock_id', '=', 'stocks.id')
+            ->join('products', 'products.id', '=', 'stocks.product_id')
+            ->leftJoin('transfers', 'transfers.stock_id', '=', 'stocks.id')
+            ->select('stocks.*','orders.esale','orders.asale','products.name as product_name')
+            ->selectRaw('SUM(sales.total_price) total_sales')
+            ->selectRaw('(CASE WHEN orders.asale = 0 then orders.esale else orders.asale end) as expected_sales')
+            ->selectRaw('(stocks.pcost + stocks.ccost + stocks.tcost) total_cost')
+            ->selectRaw('SUM(transfers.amount) total_transferred')
+            ->groupBy('stocks.id');
+
+
+        return datatables()->of($summary)
+            ->addColumn('total_cost', function ($data) {
+                return $data->total_cost ? 'KES. ' . number_format($data->total_cost, 0, ',', ',') : '';
+            })
+            ->addColumn('expected_sales', function ($data) {
+                return $data->expected_sales ? 'KES. ' . number_format($data->expected_sales, 0, ',', ',') : '';
+            })
+            ->addColumn('expenditure', function ($data) {
+                $expd = 0.1 * ($data->expected_sales - $data->total_cost);
+                return 'KES. ' . number_format($expd, 0, ',', ',');
+            })
+            ->addColumn('netprofit', function ($data) {
+                $expd = 0.9 * ($data->expected_sales - $data->total_cost);
+                return 'KES. ' . number_format($expd, 0, ',', ',');
+            })
+            ->addColumn('status', function ($data) {
+                $soldout = $data->soldout;
+                $status = "";
+                if($soldout === 1){
+                    $status = "Closed";
+                } else {
+                    $status = "Open";
+                }
+                return $status;
+            })
+            ->addColumn('transferred', function ($data) {
+                return $data->total_transferred ? 'KES. ' . number_format($data->total_transferred, 0, ',', ',') : '';
+            })
+            ->addColumn('remaining', function ($data) {
+                $remain = $data->expected_sales - $data->total_transferred;
+                return $remain ? 'KES. ' . number_format($remain, 0, ',', ',') : '';
+            })
+            ->addIndexColumn()
+            ->make(true);
+    }
+
     public function soldout(){
         $product = Product::all()->sortBy('name')->values();
         $order = Order::all()->sortBy('id')->values();
@@ -81,7 +149,25 @@ class StockController extends Controller {
     }
 
     public function getSoldOut() {
-        $data = Stock::all()->sortByDesc('created_at')->where('soldout', 1)->values();
+        //$data = Stock::all()->sortByDesc('created_at')->where('soldout', 1)->values();
+        $subQuery = Sales::groupBy('sales.stock_id')
+            ->select('sales.stock_id')
+            ->selectRaw('SUM(sales.units) total_units')
+            ->selectRaw('SUM(sales.total_price) total_sales')
+            ->selectRaw('SUM(sales.total_price)/SUM(sales.units) as avg_sale');
+        /*$transfer = DB::table('transfers')
+            ->join('orders', 'orders.id', '=', 'transfers.order_id')
+            ->join('products', 'products.id', '=', 'orders.product_id')
+            ->select('transfers.stock_id as stk_id', DB::raw("GROUP_CONCAT(products.id SEPARATOR '-') as product_ids"), DB::raw("GROUP_CONCAT(products.name SEPARATOR '-') as product_names"), DB::raw("GROUP_CONCAT(orders.batch SEPARATOR '-') as batches"), DB::raw("GROUP_CONCAT(transfers.order_id SEPARATOR '-') as orders"))
+            ->groupBy('transfers.stock_id');*/
+
+        $data = Stock::select('*')
+            ->joinSub($subQuery->toSql(), 'ps', function ($join) {
+                $join->on('ps.stock_id', '=', 'stocks.id');
+            })
+            ->where('stocks.soldout', 1)
+            ->orderBy('stocks.created_at', 'desc')
+            ->get();
 
         return datatables()->of($data)
             ->addColumn('product_name', function ($data) {
@@ -91,12 +177,26 @@ class StockController extends Controller {
                 $total = $data->pcost + $data->ccost + $data->tcost;
                 return 'KES. ' . number_format($total, 0, ',', ',');
             })
-            ->addColumn('total_sales', function ($data) {
+            ->addColumn('expected_sales', function ($data) {
                 return $data->order->esale ? 'KES. ' . number_format($data->order->esale, 0, ',', ',') : '';
             })
-            ->addColumn('profit', function ($data) {
+            ->addColumn('actual_sales', function ($data) {
+                return $data->order->asale ? 'KES. ' . number_format($data->order->asale, 0, ',', ',') : '';
+            })
+            ->addColumn('expected_profit', function ($data) {
                 $total = $data->pcost + $data->ccost + $data->tcost;
                 $profit = $data->order->esale -$total;
+                return 'KES. ' . number_format($profit, 0, ',', ',');
+            })
+            ->addColumn('actual_profit', function ($data) {
+                $total = $data->pcost + $data->ccost + $data->tcost;
+                $profit = $data->order->asale -$total;
+                return 'KES. ' . number_format($profit, 0, ',', ',');
+            })
+            ->addColumn('system_profit', function ($data) {
+                $total_cost = $data->pcost + $data->ccost + $data->tcost;
+                $system_sales = $data->avg_sale * $data->units;
+                $profit = $system_sales - $total_cost;
                 return 'KES. ' . number_format($profit, 0, ',', ',');
             })
             ->addColumn('added_by', function ($data) {
@@ -109,25 +209,77 @@ class StockController extends Controller {
             ->make(true);
     }
 
+    public function getStockTransfers($id)
+    {
+        //$transfer = Transfer::all()->sortByDesc('updated_at')->values();
+        $transfer = DB::table('transfers')
+            ->join('orders', 'orders.id', '=', 'transfers.order_id')
+            ->join('products', 'products.id', '=', 'orders.product_id')
+            ->select('transfers.*','products.id as product_id','products.name as product_name','orders.batch')
+            ->where('transfers.stock_id', $id)
+            ->get();
+        return datatables()->of($transfer)
+            ->addColumn('date', function ($data) {
+                return isset($data->updated_at) ? $data->updated_at : '';
+            })
+            ->addIndexColumn()
+            ->make(true);
+        //return compact('transfer');
+    }
+
     public function getData() {
-        $data = Stock::all()->sortByDesc('created_at')->values();
+        $subQuery = Sales::groupBy('sales.stock_id')
+            ->select('sales.stock_id')
+            ->selectRaw('SUM(sales.units) total_units')
+            ->selectRaw('SUM(sales.total_price) total_sales')
+            ->selectRaw('SUM(sales.total_price)/SUM(sales.units) as avg_sale');
+        $data = Stock::select('*')
+            ->joinSub($subQuery->toSql(), 'ps', function ($join) {
+                $join->on('ps.stock_id', '=', 'stocks.id');
+            })
+            ->where('stocks.soldout', 0)
+            ->orderBy('stocks.created_at', 'desc')
+            ->get();
+
 
         return datatables()->of($data)
-                        ->addColumn('product_name', function ($data) {
-                            return isset($data->product->name) ? $data->product->name : '';
-                        })
-                        ->addColumn('total_cost', function ($data) {
-                            $total = $data->pcost + $data->ccost + $data->tcost;
-                            return 'KES. ' . number_format($total, 0, ',', ',');
-                        })
-                        ->addColumn('added_by', function ($data) {
-                            return isset($data->user->username) ? $data->user->username : '';
-                        })
-                        ->addColumn('date_added', function ($data) {
-                            return isset($data->created_at) ? $data->created_at : '';
-                        })
-                        ->addIndexColumn()
-                        ->make(true);
+            ->addColumn('product_name', function ($data) {
+                return isset($data->product->name) ? $data->product->name : '';
+            })
+            ->addColumn('total_cost', function ($data) {
+                $total = $data->pcost + $data->ccost + $data->tcost;
+                return 'KES. ' . number_format($total, 0, ',', ',');
+            })
+            ->addColumn('expected_sales', function ($data) {
+                return $data->order->esale ? 'KES. ' . number_format($data->order->esale, 0, ',', ',') : '';
+            })
+            ->addColumn('actual_sales', function ($data) {
+                return $data->order->asale ? 'KES. ' . number_format($data->order->asale, 0, ',', ',') : '';
+            })
+            ->addColumn('expected_profit', function ($data) {
+                $total = $data->pcost + $data->ccost + $data->tcost;
+                $profit = $data->order->esale -$total;
+                return 'KES. ' . number_format($profit, 0, ',', ',');
+            })
+            ->addColumn('actual_profit', function ($data) {
+                $total = $data->pcost + $data->ccost + $data->tcost;
+                $profit = $data->order->asale -$total;
+                return 'KES. ' . number_format($profit, 0, ',', ',');
+            })
+            ->addColumn('system_profit', function ($data) {
+                $total_cost = $data->pcost + $data->ccost + $data->tcost;
+                $system_sales = $data->avg_sale * $data->units;
+                $profit = $system_sales - $total_cost;
+                return 'KES. ' . number_format($profit, 0, ',', ',');
+            })
+            ->addColumn('added_by', function ($data) {
+                return isset($data->user->username) ? $data->user->username : '';
+            })
+            ->addColumn('date_added', function ($data) {
+                return isset($data->created_at) ? $data->created_at : '';
+            })
+            ->addIndexColumn()
+            ->make(true);
     }
 
     public function store(Request $req) {

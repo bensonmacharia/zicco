@@ -25,6 +25,7 @@ class CreateOrdersTable extends Migration
             $table->double('ccost');
             $table->double('tcost');
             $table->double('esale');
+            $table->double('asale')->default('0');
             $table->tinyInteger('status')->default('0');
             $table->tinyInteger('payment')->default('0');
             $table->timestamps();

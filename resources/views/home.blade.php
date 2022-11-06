@@ -58,9 +58,10 @@
     $(document).ready(function(){
         loadSummarySalesCreditChart();
         loadSummarySalesWeekly();
-        loadSummaryStock();
+        console.log({{$cash}});
+        console.log({{$credit}});
     });
-    
+
     function loadSummarySalesCreditChart(){
         //-------------
         //- DONUT CHART -
@@ -91,7 +92,7 @@
           options: donutOptions
         })
     }
-    
+
     function loadSummarySalesWeekly(){
         //-------------
         //- BAR CHART -
@@ -129,6 +130,6 @@
           options: barChartOptions
         })
     }
-    
+
 </script>
 @stop

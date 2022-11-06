@@ -5,14 +5,34 @@ namespace App\Http\Controllers;
 use App\Models\Product;
 use App\Models\Customer;
 use App\Models\Sales;
+use App\Models\Stock;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class SalesController extends Controller {
 
     public function index() {
-        $product = Product::all()->sortBy('name')->values();
+        //$product = Product::all()->sortBy('name')->values();
+        $stock = Stock::all()->sortBy('product.name')->where('batch', '!=', 0)->where('soldout', 0)->values();
         $customer = Customer::all()->sortBy('name')->values();
-        return view('pages/sales/index', compact('product', 'customer'));
+        return view('pages/sales/index', compact('stock', 'customer'));
+    }
+
+    public function updateStockSales(){
+        $product = Product::all()->sortBy('name')->values();
+        $query = "";
+        for($i=1; $i<=count($product); $i++){
+            $stock = DB::table('stocks')->select('id')->where('product_id', $i);
+            /*$query = DB::table('sales')
+                ->where('product_id', $i)
+                ->update(['product_id' => DB::raw('SELECT id FROM stocks WHERE product_id = '.$i.' ORDER BY id LIMIT 1')]);*/
+            $query = DB::update(DB::raw('UPDATE sales SET stock_id = (SELECT id FROM stocks WHERE product_id = '.$i.' ORDER BY id LIMIT 1) WHERE product_id = '.$i));
+        }
+        if($query){
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public function getData() {
@@ -20,7 +40,10 @@ class SalesController extends Controller {
 
         return datatables()->of($data)
                         ->addColumn('product', function ($data) {
-                            return isset($data->product->name) ? $data->product->name : '';
+                            $product = $data->stock->product->name;
+                            $batch = $data->stock->batch;
+                            $prd = $batch." - ".$product;
+                            return isset($prd) ? $prd : '';
                         })
                         ->addColumn('customer', function ($data) {
                             return isset($data->customer->name) ? $data->customer->name : '';
@@ -49,7 +72,7 @@ class SalesController extends Controller {
         $id = $req->id ?: 0;
 
         $validated = $req->validate([
-            'product_id' => 'required|max:50',
+            'stock_id' => 'required|max:50',
             'units' => 'required|max:20',
             'price' => 'required|max:20',
             'customer_id' => 'required',
@@ -66,6 +89,10 @@ class SalesController extends Controller {
         }
 
         $data_input['price'] = str_replace('.', '', $data_input['price']);
+        $stock_id = $data_input['stock_id'];
+        $pdt = DB::select(DB::raw("SELECT product_id FROM stocks WHERE id = $stock_id"));
+        $product_id = $pdt[0]->product_id;
+        $data_input['product_id'] = $product_id;
         $data_input['user_id'] = auth()->user()->id;
         $data_input['total_price'] = $req->units * $req->price;
 

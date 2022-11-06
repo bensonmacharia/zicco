@@ -265,13 +265,18 @@ return [
             'icon'        => 'far fa-circle text-info',
         ],
         [
-            'text'        => 'Record Stock',
+            'text'        => 'Manage Stock',
             'url'         => 'stock/manage',
             'icon'        => 'far fa-circle text-info',
         ],
         [
             'text'        => 'Sold Out',
             'url'         => 'stock/soldout',
+            'icon'        => 'far fa-circle text-info',
+        ],
+        [
+            'text'        => 'Aggregate',
+            'url'         => 'stock/aggregate',
             'icon'        => 'far fa-circle text-info',
         ],
         ['header' => 'PRODUCT'],

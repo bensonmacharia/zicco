@@ -14,7 +14,7 @@ class UpdateTableStocks extends Migration
     public function up()
     {
         Schema::table('stocks', function (Blueprint $table) {
-            $table->unsignedBigInteger('order_id');
+            $table->unsignedBigInteger('order_id')->default('1');
             $table->integer('batch');
             $table->tinyInteger('soldout')->default('0');
             $table->renameColumn('cost', 'pcost');
