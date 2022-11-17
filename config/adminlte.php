@@ -14,7 +14,7 @@ return [
     |
     */
 
-    'title' => 'Demo TECH',
+    'title' => 'Zicco TECH',
     'title_prefix' => '',
     'title_postfix' => '',
 
@@ -45,7 +45,7 @@ return [
     |
     */
 
-    'logo' => '<b>Demo TECH</b>',
+    'logo' => '<b>Zicco TECH</b>',
     'logo_img' => 'vendor/adminlte/dist/img/AdminLTELogo.png',
     'logo_img_class' => 'brand-image img-circle elevation-3',
     'logo_img_xl' => null,
@@ -254,7 +254,7 @@ return [
         ],
         ['header' => 'ORDERS'],
         [
-            'text'        => 'Create Order',
+            'text'        => 'Manage Order',
             'url'         => 'order/manage',
             'icon'        => 'far fa-circle',
         ],
@@ -275,8 +275,8 @@ return [
             'icon'        => 'far fa-circle text-info',
         ],
         [
-            'text'        => 'Aggregate',
-            'url'         => 'stock/aggregate',
+            'text'        => 'Balances',
+            'url'         => 'stock/balances',
             'icon'        => 'far fa-circle text-info',
         ],
         ['header' => 'PRODUCT'],

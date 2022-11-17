@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Expense;
 use App\Models\Product;
 use App\Models\Customer;
 use App\Models\Sales;
 use App\Models\Stock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class SalesController extends Controller {
 
@@ -36,7 +38,7 @@ class SalesController extends Controller {
     }
 
     public function getData() {
-        $data = Sales::all()->sortByDesc('updated_at')->values();
+        $data = Sales::all()->sortByDesc('created_at')->take(50)->values();
 
         return datatables()->of($data)
                         ->addColumn('product', function ($data) {
@@ -62,7 +64,8 @@ class SalesController extends Controller {
                             return isset($data->user->username) ? $data->user->username : '';
                         })
                         ->addColumn('date_added', function ($data) {
-                            return isset($data->updated_at) ? $data->updated_at : '';
+                            $date = date('d-M-Y', strtotime($data->created_at));
+                            return $date;
                         })
                         ->addIndexColumn()
                         ->make(true);

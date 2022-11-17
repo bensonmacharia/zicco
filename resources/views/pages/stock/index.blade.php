@@ -33,6 +33,7 @@
                         <th>Batch</th>
                         <th>Units</th>
                         <th>Total Cost</th>
+                        <th>Spoilt</th>
                         <th>Date Added</th>
                         <th>Action</th>
                     </tr>
@@ -75,7 +76,7 @@
                             <select class="form-control select2" id="soldout" name="soldout" style="width:80%">
                                 <option value=''>--Select--</option>
                                 <option value="1">Yes</option>
-                                <option value="0">No</option>
+                                <option value="0" selected>No</option>
                             </select>
                         </div>
                     </div>
@@ -124,6 +125,13 @@
                                        name="tcost" placeholder="Actual transport cost" required>
                                 <span class="input-group-text">.00</span>
                             </div>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="spoilt" class="col-sm-3 col-form-label">Spoilt *</label>
+                        <div class="col-sm-8">
+                            <input type="number" class="form-control" autocomplete="off" id="spoilt" name="spoilt"
+                                   placeholder="Number of spoilt units e.g. 5" required>
                         </div>
                     </div>
                 </div>
@@ -244,6 +252,7 @@
                 {data: 'batch', name: 'batch'},
                 {data: 'units', name: 'units'},
                 {data: 'total_cost', name: 'total_cost'},
+                {data: 'spoilt', name: 'spoilt'},
                 {data: 'date_added', name: 'date_added'},
                 { "data": null,"sortable": false,
                     render: function (data, type, row, meta) {
@@ -254,6 +263,7 @@
                                     data-pcost = \''+row.pcost+'\' \
                                     data-ccost = \''+row.ccost+'\' \
                                     data-tcost = \''+row.tcost+'\' \
+                                    data-spoilt = '+row.spoilt+' \
                                     data-order_id = '+row.order_id+' \
                                     data-product_id = '+row.product_id+' \
                                     data-soldout = '+row.soldout+' \
@@ -265,6 +275,7 @@
                                     data-pcost = \''+row.pcost+'\' \
                                     data-ccost = \''+row.ccost+'\' \
                                     data-tcost = \''+row.tcost+'\' \
+                                    data-spoilt = '+row.spoilt+' \
                                     data-order_id = '+row.order_id+' \
                                     data-product_id = '+row.product_id+' \
                                     data-product_name = \''+row.product_name+'\' \
@@ -320,11 +331,12 @@
         $('#id').val($(e).data('id'));
         $('#batch').val($(e).data('batch'));
         $('#units').val($(e).data('units'));
+        $('#spoilt').val($(e).data('spoilt'));
         $('#pcost').val($(e).data('pcost'));
         $('#ccost').val($(e).data('ccost'));
         $('#tcost').val($(e).data('tcost'));
         //$('#order_id').val($(e).data('id'));
-        $('#order_id').val($(e).data('id')).trigger('change');
+        $('#order_id').val($(e).data('order_id')).trigger('change');
         $('#soldout').val($(e).data('soldout')).trigger('change');
 
         $('.alert').hide();
@@ -339,6 +351,7 @@
         let pcost = document.getElementById('pcost').value;
         let ccost = document.getElementById('ccost').value;
         let tcost = document.getElementById('tcost').value;
+        let spoilt = document.getElementById('spoilt').value;
         let product_id = document.getElementById('product_id').value;
 
         var url = "{{ url('admin/stock/save') }}";
@@ -365,6 +378,7 @@
             form_data.append('pcost', pcost);
             form_data.append('ccost', ccost);
             form_data.append('tcost', tcost);
+            form_data.append('spoilt', spoilt);
             form_data.append('product_id', product_id);
 
             $.ajax({
@@ -404,6 +418,7 @@
         $('#pcost').val($(e).data('pcost'));
         $('#ccost').val($(e).data('ccost'));
         $('#tcost').val($(e).data('tcost'));
+        $('#spoilt').val($(e).data('spoilt'));
         $('#order_id').val($(e).data('order_id'));
         $('#product_id').val($(e).data('product_id'));
         $('#soldout').val($(e).data('soldout'));
@@ -471,6 +486,7 @@
         $('#pcost').val('');
         $('#ccost').val('');
         $('#tcost').val('');
+        $('#spoilt').val(0);
         $('#input').val('');
         $('.alert').hide();
         $('#formStock').trigger("reset");

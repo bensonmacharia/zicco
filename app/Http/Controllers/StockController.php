@@ -27,6 +27,11 @@ class StockController extends Controller {
         return view('pages/stock/aggregate', compact('product'));
     }
 
+    public function balances() {
+        $product = Product::all()->sortBy('name')->values();
+        return view('pages/stock/balances', compact('product'));
+    }
+
     public function load_stock_aggregate() {
         $subQuery = Stock::select('products.id as product_id', 'products.name as product_name')
             ->selectRaw('SUM(stocks.units) as total_units')
@@ -85,6 +90,66 @@ class StockController extends Controller {
                         ->make(true);
     }
 
+    public function load_stock_balances() {
+        $subQuery = Sales::groupBy('sales.stock_id')
+            ->select('sales.stock_id')
+            ->selectRaw('SUM(sales.units) total_sold')
+            ->selectRaw('SUM(sales.total_price) total_sales')
+            ->selectRaw('SUM(sales.amnt_paid) total_paid');
+
+        $data = Stock::select('stocks.id as stock_id','stocks.batch as batch_id','stocks.spoilt','products.id as product_id', 'products.name as product_name','ps.total_sold','ps.total_sales','ps.total_paid')
+            ->selectRaw('stocks.pcost + stocks.ccost + stocks.tcost as total_cost')
+            ->selectRaw('SUM(stocks.units) as total_units')
+            ->join('products', 'products.id', '=', 'stocks.product_id')
+            ->leftjoinSub($subQuery->toSql(), 'ps', function ($join) {
+                $join->on('ps.stock_id', '=', 'stocks.id');
+            })
+            ->groupBy('stocks.id')
+            ->orderBy('stocks.created_at', 'desc')
+            ->get();
+
+
+        return datatables()->of($data)
+            ->addColumn('product_id', function ($data) {
+                return isset($data->product_id) ? $data->product_id : '';
+            })
+            ->addColumn('product_name', function ($data) {
+                $product = $data->batch_id." - ".$data->product_name;
+                return $product;
+            })
+            ->addColumn('total_units', function ($data) {
+                return isset($data->total_units) ? number_format($data->total_units, 0, ',', ',') : '';
+            })
+            ->addColumn('total_sold', function ($data) {
+                return isset($data->total_sold) ? number_format($data->total_sold, 0, ',', ',') : '';
+            })
+            ->addColumn('total_remaining', function ($data) {
+                $all = $data->total_units;
+                $sold = $data->total_sold;
+                $balance = $all - $sold - $data->spoilt;
+                return number_format($balance, 0, ',', ',');
+            })
+            ->addColumn('total_sales', function ($data) {
+                return $data->total_sales ? 'KES. ' . number_format($data->total_sales, 0, ',', ',') : '';
+            })
+            ->addColumn('total_paid', function ($data) {
+                return $data->total_paid ? 'KES. ' . number_format($data->total_paid, 0, ',', ',') : '';
+            })
+            ->addColumn('total_balance', function ($data) {
+                $sales = $data->total_sales;
+                $paid = $data->total_paid;
+                $credit = $sales - $paid;
+                return 'KES. ' . number_format($credit, 0, ',', ',');
+            })
+            ->addColumn('total_profit', function ($data) {
+                $sales_cost = ($data->total_cost*$data->total_sold/$data->total_units);
+                $profit = $data->total_sales - $sales_cost;
+                return 'KES. ' . number_format($profit, 0, ',', ',');
+            })
+            ->addIndexColumn()
+            ->make(true);
+    }
+
     public function load_stock_summary() {
         $transfer = DB::table('transfers')
             ->join('stocks', 'stocks.id', '=', 'transfers.stock_id')
@@ -97,16 +162,21 @@ class StockController extends Controller {
             ->join('orders', 'orders.id', '=', 'stocks.order_id')
             ->leftJoin('sales', 'sales.stock_id', '=', 'stocks.id')
             ->join('products', 'products.id', '=', 'stocks.product_id')
-            ->leftJoin('transfers', 'transfers.stock_id', '=', 'stocks.id')
-            ->select('stocks.*','orders.esale','orders.asale','products.name as product_name')
+            ->leftjoinSub($transfer->toSql(), 'ps', function ($join) {
+                $join->on('ps.stock_id', '=', 'stocks.id');
+            })
+            ->select('stocks.*','orders.esale','orders.asale','products.name as product_name','ps.total_transferred')
             ->selectRaw('SUM(sales.total_price) total_sales')
             ->selectRaw('(CASE WHEN orders.asale = 0 then orders.esale else orders.asale end) as expected_sales')
             ->selectRaw('(stocks.pcost + stocks.ccost + stocks.tcost) total_cost')
-            ->selectRaw('SUM(transfers.amount) total_transferred')
+            ->where("stocks.batch","!=", 0)
             ->groupBy('stocks.id');
 
 
         return datatables()->of($summary)
+            ->addColumn('product_name', function ($data) {
+                return $data->batch." - ".$data->product_name;
+            })
             ->addColumn('total_cost', function ($data) {
                 return $data->total_cost ? 'KES. ' . number_format($data->total_cost, 0, ',', ',') : '';
             })
@@ -234,7 +304,7 @@ class StockController extends Controller {
             ->selectRaw('SUM(sales.total_price) total_sales')
             ->selectRaw('SUM(sales.total_price)/SUM(sales.units) as avg_sale');
         $data = Stock::select('*')
-            ->joinSub($subQuery->toSql(), 'ps', function ($join) {
+            ->leftjoinSub($subQuery->toSql(), 'ps', function ($join) {
                 $join->on('ps.stock_id', '=', 'stocks.id');
             })
             ->where('stocks.soldout', 0)
@@ -276,7 +346,8 @@ class StockController extends Controller {
                 return isset($data->user->username) ? $data->user->username : '';
             })
             ->addColumn('date_added', function ($data) {
-                return isset($data->created_at) ? $data->created_at : '';
+                $date = date('d-M-Y', strtotime($data->created_at));
+                return $date;
             })
             ->addIndexColumn()
             ->make(true);
@@ -290,6 +361,7 @@ class StockController extends Controller {
             'product_id' => 'required',
             'batch' => 'required|max:10',
             'units' => 'required|max:50',
+            'spoilt' => 'required',
             'pcost' => 'required',
             'ccost' => 'required',
             'tcost' => 'required',

@@ -1,9 +1,9 @@
 @extends('adminlte::page')
 
-@section('title', 'Debtors')
+@section('title', 'Stock Balances')
 
 @section('content_header')
-    <h1>Debtors</h1>
+    <h1>Stock Balances</h1>
 @stop
 
 @section('content')
@@ -24,19 +24,17 @@
                     <thead>
                         <tr>
                             <th>No</th>
-                            <th>Customer</th>
                             <th>Product</th>
-                            <th>Units</th>
-                            <th>Price</th>
-                            <th>Total Price</th>
-                            <th>Paid</th>
-                            <th>Balance</th>
-                            <th>Receipt</th>
-                            <th>Invoice</th>
-                            <th>Date</th>
-                            <th>Age</th>
+                            <th>Total Units</th>
+                            <th>Sold Units</th>
+                            <th>Spoilt</th>
+                            <th>Remaining Units</th>
+                            <th>Total Sales</th>
+                            <th>Credit Amount</th>
+                            <th>Profit</th>
                         </tr>
                     </thead>
+
                 </table>
             </div>
         </div>
@@ -56,11 +54,11 @@
 <script type="text/javascript">
 
 $(document).ready(function(){
-    loadDebtors();
+    loadSummaryStock();
 });
 
-function loadDebtors(){
-    const page_url = '{{ url('report/sales/get-debtors') }}';
+function loadSummaryStock(){
+    const page_url = '{{ url('stock/load_stock_balances') }}';
     $.fn.dataTable.ext.errMode = 'ignore';
     var table = $('#stock').DataTable({
         "autoWidth": false,
@@ -72,18 +70,15 @@ function loadDebtors(){
             url: page_url,
         },
         columns: [
-                {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false,searchable: false},
-                {data: 'customer', name: 'customer'},
-                {data: 'product', name: 'product'},
-                {data: 'units', name: 'units'},
-                {data: 'price', name: 'price'},
-                {data: 'total_price', name: 'total_price'},
-                {data: 'paid', name: 'paid'},
-                {data: 'balance', name: 'balance'},
-                {data: 'rcpt_no', name: 'rcpt_no'},
-                {data: 'inv_no', name: 'inv_no'},
-                {data: 'date_added', name: 'date_added'},
-                {data: 'time_ago', name: 'time_ago'},
+            {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false,searchable: false},
+            {data: 'product_name', name: 'product_name'},
+            {data: 'total_units', name: 'total_units'},
+            {data: 'total_sold', name: 'total_sold'},
+            {data: 'spoilt', name: 'spoilt'},
+            {data: 'total_remaining', name: 'total_remaining'},
+            {data: 'total_sales', name: 'total_sales'},
+            {data: 'total_balance', name: 'total_balance'},
+            {data: 'total_profit', name: 'total_profit'},
         ],
         oLanguage: {
             sLengthMenu: "_MENU_",

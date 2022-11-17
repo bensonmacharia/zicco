@@ -30,6 +30,7 @@
                         <th>Product</th>
                         <th>Batch</th>
                         <th>Units</th>
+                        <th>Spoilt</th>
                         <th>Total Cost</th>
                         <th>Total Sales</th>
                         <th>Profit</th>
@@ -142,6 +143,7 @@
                 {data: 'product_name', name: 'product_name'},
                 {data: 'batch', name: 'batch'},
                 {data: 'units', name: 'units'},
+                {data: 'spoilt', name: 'spoilt'},
                 {data: 'total_cost', name: 'total_cost'},
                 {data: 'actual_sales', name: 'actual_sales'},
                 {data: 'actual_profit', name: 'actual_profit'},
@@ -151,6 +153,7 @@
                                     data-id = '+row.id+' \
                                     data-batch = \''+row.batch+'\' \
                                     data-units = '+row.units+' \
+                                    data-spoilt = '+row.spoilt+' \
                                     data-pcost = \''+row.pcost+'\' \
                                     data-ccost = \''+row.ccost+'\' \
                                     data-tcost = \''+row.tcost+'\' \
@@ -189,6 +192,7 @@
         $('#id').val($(e).data('id'));
         $('#batch').val($(e).data('batch'));
         $('#units').val($(e).data('units'));
+        $('#spoilt').val($(e).data('spoilt'));
         $('#pcost').val($(e).data('pcost'));
         $('#ccost').val($(e).data('ccost'));
         $('#tcost').val($(e).data('tcost'));
@@ -257,6 +261,7 @@
         $('#id').val('');
         $('#batch').val('');
         $('#units').val('');
+        $('#spoilt').val(0);
         $('#pcost').val('');
         $('#ccost').val('');
         $('#tcost').val('');

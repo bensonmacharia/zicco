@@ -13,7 +13,7 @@ class ExpensesController extends Controller
     }
 
     public function getData() {
-        $data = Expense::all()->sortByDesc('created_at')->values();
+        $data = Expense::all()->sortByDesc('updated_at')->values();
 
         return datatables()->of($data)
             ->addColumn('expense_category', function ($data) {
@@ -50,7 +50,8 @@ class ExpensesController extends Controller
                 return isset($data->user->username) ? $data->user->username : '';
             })
             ->addColumn('date_added', function ($data) {
-                return isset($data->created_at) ? $data->created_at : '';
+                $date = date('d-M-Y', strtotime($data->updated_at));
+                return $date;
             })
             ->addIndexColumn()
             ->make(true);

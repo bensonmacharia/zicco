@@ -62,12 +62,12 @@ $config = [
                                 <th>Customer</th>
                                 <th>Product</th>
                                 <th>Units</th>
-                                <th>Unit Price (KES.)</th>
-                                <th>Total Price (KES.)</th>
-                                <th>Paid (KES.)</th>
-                                <th>Balance (KES.)</th>
+                                <th>Price</th>
+                                <th>Total Price</th>
+                                <th>Paid</th>
+                                <th>Balance</th>
+                                <th>Profit</th>
                                 <th>Receipt</th>
-                                <th>Invoice</th>
                                 <th>Date</th>
                             </tr>
                         </thead>
@@ -128,8 +128,8 @@ function getSaleByCustomerDefault()
                 {data: 'total_price', name: 'total_price'},
                 {data: 'paid', name: 'paid'},
                 {data: 'balance', name: 'balance'},
+                {data: 'profit', name: 'profit'},
                 {data: 'rcpt_no', name: 'rcpt_no'},
-                {data: 'inv_no', name: 'inv_no'},
                 {data: 'date_added', name: 'date_added'},
             ],
             responsive: true,
@@ -153,10 +153,12 @@ function getSaleByCustomerDefault()
                 var total_price = 0;
                 var paid = 0;
                 var balance = 0;
+                var profit = 0;
                 aaData.forEach(function(x) {
                     total_price += (x['total_price']);
                     paid += (x['paid']);
                     balance += (x['balance']);
+                    profit += (x['profit']);
                 });
                 $(api.column(5).footer()).html(
                     total_price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
@@ -166,6 +168,9 @@ function getSaleByCustomerDefault()
                 );
                 $(api.column(7).footer()).html(
                     balance.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                );
+                $(api.column(8).footer()).html(
+                    profit.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                 );
             }
         });
@@ -196,8 +201,8 @@ function getSaleByCustomer()
                 {data: 'total_price', name: 'total_price'},
                 {data: 'paid', name: 'paid'},
                 {data: 'balance', name: 'balance'},
+                {data: 'profit', name: 'profit'},
                 {data: 'rcpt_no', name: 'rcpt_no'},
-                {data: 'inv_no', name: 'inv_no'},
                 {data: 'date_added', name: 'date_added'},
             ],
             responsive: true,
@@ -221,10 +226,12 @@ function getSaleByCustomer()
                 var total_price = 0;
                 var paid = 0;
                 var balance = 0;
+                var profit = 0;
                 aaData.forEach(function(x) {
                     total_price += (x['total_price']);
                     paid += (x['paid']);
                     balance += (x['balance']);
+                    profit += (x['profit']);
                 });
                 // I need a footer in my table before doing this, what is the smartest way to add the footer?
                 $(api.column(5).footer()).html(
@@ -235,6 +242,9 @@ function getSaleByCustomer()
                 );
                 $(api.column(7).footer()).html(
                     balance.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
+                );
+                $(api.column(8).footer()).html(
+                    profit.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                 );
             }
         });

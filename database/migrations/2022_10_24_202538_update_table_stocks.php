@@ -17,6 +17,7 @@ class UpdateTableStocks extends Migration
             $table->unsignedBigInteger('order_id')->default('1');
             $table->integer('batch');
             $table->tinyInteger('soldout')->default('0');
+            $table->integer('spoilt')->default('0');
             $table->renameColumn('cost', 'pcost');
             $table->double('ccost');
             $table->double('tcost');
@@ -34,6 +35,7 @@ class UpdateTableStocks extends Migration
             $table->dropColumn(['order_id']);
             $table->dropColumn(['batch']);
             $table->double('cost');
+            $table->dropColumn(['spoilt']);
             $table->dropColumn(['pcost']);
             $table->dropColumn(['ccost']);
             $table->dropColumn(['tcost']);

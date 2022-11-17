@@ -42,9 +42,11 @@ Route::group(['middleware' => ['auth']], function() {
     Route::get('admin/order/get-transfers/{id}', [App\Http\Controllers\OrderController::class, 'getTransfers']);
     Route::get('stock/summary', [App\Http\Controllers\StockController::class, 'summary'])->name('summary');
     Route::get('stock/aggregate', [App\Http\Controllers\StockController::class, 'aggregate'])->name('aggregate');
+    Route::get('stock/balances', [App\Http\Controllers\StockController::class, 'balances'])->name('balances');
     Route::get('stock/soldout', [App\Http\Controllers\StockController::class, 'soldout'])->name('soldout');
     Route::get('stock/load_stock_summary', [App\Http\Controllers\StockController::class, 'load_stock_summary']);
     Route::get('stock/load_stock_aggregate', [App\Http\Controllers\StockController::class, 'load_stock_aggregate']);
+    Route::get('stock/load_stock_balances', [App\Http\Controllers\StockController::class, 'load_stock_balances']);
     Route::get('stock/manage', [App\Http\Controllers\StockController::class, 'index'])->name('stock');
     Route::get('admin/stock/get-data', [App\Http\Controllers\StockController::class, 'getData']);
     Route::get('admin/stock/get-soldout', [App\Http\Controllers\StockController::class, 'getSoldOut']);
