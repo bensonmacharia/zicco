@@ -35,6 +35,71 @@ class OrderController extends Controller
         return view('pages/orders/index', compact('product', 'partner', 'stock'));
     }
 
+    public function shipping(){
+        $product = Product::all()->sortBy('name')->values();
+        $stock = Stock::all()->sortBy('product.name')->values();
+        return view('pages/orders/shipping', compact('product', 'stock'));
+    }
+
+    public function getInShipment()
+    {
+        $data = DB::table('orders')
+            ->join('products', 'products.id', '=', 'orders.product_id')
+            ->join('users', 'users.id', '=', 'orders.user_id')
+            ->select('orders.*','products.name AS product_name','users.username AS added_by')
+            ->whereNotExists(function($query)
+            {
+                $query->select(DB::raw(1))
+                    ->from('stocks')
+                    ->whereRaw('orders.product_id = stocks.product_id')
+                    ->whereRaw('orders.batch = stocks.batch');
+            })
+            ->get();
+
+        //$data1 = Order::all()->sortByDesc('created_at')->values();
+
+        return datatables()->of($data)
+            ->addColumn('product_name', function ($data) {
+                return isset($data->product_name) ? $data->product_name : '';
+            })
+            ->addColumn('batch', function ($data) {
+                return isset($data->batch) ? $data->batch : '';
+            })
+            ->addColumn('product_and_batch', function ($data) {
+                $pandb = $data->batch." - ".$data->product_name;
+                return $pandb;
+            })
+            ->addColumn('units', function ($data) {
+                return isset($data->units) ? $data->units : '';
+            })
+            ->addColumn('ppcost', function ($data) {
+                return $data->pcost ? 'KES. ' . number_format($data->pcost, 0, ',', ',') : '';
+            })
+            ->addColumn('cccost', function ($data) {
+                return $data->ccost ? 'KES. ' . number_format($data->ccost, 0, ',', ',') : '';
+            })
+            ->addColumn('ttcost', function ($data) {
+                return $data->tcost ? 'KES. ' . number_format($data->tcost, 0, ',', ',') : '';
+            })
+            ->addColumn('scost', function ($data) {
+                $total = $data->pcost + $data->ccost + $data->tcost;
+                return 'KES. ' . number_format($total, 0, ',', ',');
+            })
+            ->addColumn('eprofit', function ($data) {
+                $total_cost = $data->pcost + $data->ccost + $data->tcost;
+                $eprofit = $data->esale - $total_cost;
+                return $eprofit;
+            })
+            ->addColumn('added_by', function ($data) {
+                return isset($data->added_by) ? $data->added_by : '';
+            })
+            ->addColumn('date_added', function ($data) {
+                return isset($data->created_at) ? $data->created_at : '';
+            })
+            ->addIndexColumn()
+            ->make(true);
+    }
+
 
     public function getData()
     {

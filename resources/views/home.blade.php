@@ -48,6 +48,36 @@
     </div>
 </div>
 <div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-tasks mr-1"></i>
+                    Products Almost Soldout
+                </h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <table id="aso" class="table table-bordered table-striped">
+                    <thead>
+                    <tr>
+                        <th>No</th>
+                        <th>Product</th>
+                        <th>Remaining Units</th>
+                        <th>Total Units</th>
+                        <th>Total Sold</th>
+                        <th>Total Spoilt</th>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="row">
     <div class="col-lg-6">
         <div class="card">
             <div class="card-header">
@@ -156,6 +186,7 @@
         loadSummarySalesWeekly();
         var mont = {!! json_encode($mont) !!};
         loadNetProfitTrendGraph(mont);
+        loadAlmostSoldOutStock();
         //console.log(mont[0]['month']+" "+mont[0]['year']);
         //console.log({{$credit}});
     });
@@ -286,6 +317,43 @@
           data: barChartData,
           options: barChartOptions
         })
+    }
+
+    function loadAlmostSoldOutStock(){
+        const page_url = '{{ url('stock/load_stock_almost_soldout') }}';
+        $.fn.dataTable.ext.errMode = 'ignore';
+        var table = $('#aso').DataTable({
+            "autoWidth": false,
+            "responsive": true,
+            processing: true,
+            serverSide: true,
+            "bDestroy": true,
+            ajax: {
+                url: page_url,
+            },
+            columns: [
+                {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false,searchable: false},
+                {data: 'product_name', name: 'product_name'},
+                {data: 'total_balance', name: 'total_balance'},
+                {data: 'total_units', name: 'total_units'},
+                {data: 'total_sold', name: 'total_sold'},
+                {data: 'total_spoilt', name: 'total_spoilt'},
+            ],
+            oLanguage: {
+                sLengthMenu: "_MENU_",
+                sSearch: ""
+            },
+            aLengthMenu: [[4, 10, 15, 20], [4, 10, 15, 20]],
+            pageLength: 20,
+            buttons: [
+            ],
+            initComplete: function (settings, json) {
+                $(".dt-buttons .btn").removeClass("btn-secondary")
+            },
+            drawCallback: function (settings) {
+                console.log(settings.json);
+            }
+        });
     }
 
 </script>

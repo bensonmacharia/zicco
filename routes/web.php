@@ -34,12 +34,14 @@ Route::group(['middleware' => ['auth']], function() {
     Route::post('admin/upload-product', [App\Http\Controllers\ProductController::class, 'upload_product']);
     Route::get('product/category', [App\Http\Controllers\CategoryController::class, 'index'])->name('category');
     Route::get('order/manage', [App\Http\Controllers\OrderController::class, 'index'])->name('order');
+    Route::get('order/shipping', [App\Http\Controllers\OrderController::class, 'shipping']);
     Route::post('admin/order/save', [App\Http\Controllers\OrderController::class, 'store']);
     Route::post('admin/order/payment', [App\Http\Controllers\OrderController::class, 'payment']);
     Route::get('admin/order/get-data', [App\Http\Controllers\OrderController::class, 'getData']);
     Route::get('admin/order/get-order/{id}', [App\Http\Controllers\OrderController::class, 'getOrder']);
     Route::get('admin/order/get-contributions/{id}', [App\Http\Controllers\OrderController::class, 'getContributions']);
     Route::get('admin/order/get-transfers/{id}', [App\Http\Controllers\OrderController::class, 'getTransfers']);
+    Route::get('admin/order/get-shipping', [App\Http\Controllers\OrderController::class, 'getInShipment']);
     Route::get('stock/summary', [App\Http\Controllers\StockController::class, 'summary'])->name('summary');
     Route::get('stock/aggregate', [App\Http\Controllers\StockController::class, 'aggregate'])->name('aggregate');
     Route::get('stock/balances', [App\Http\Controllers\StockController::class, 'balances'])->name('balances');
@@ -47,6 +49,7 @@ Route::group(['middleware' => ['auth']], function() {
     Route::get('stock/load_stock_summary', [App\Http\Controllers\StockController::class, 'load_stock_summary']);
     Route::get('stock/load_stock_aggregate', [App\Http\Controllers\StockController::class, 'load_stock_aggregate']);
     Route::get('stock/load_stock_balances', [App\Http\Controllers\StockController::class, 'load_stock_balances']);
+    Route::get('stock/load_stock_almost_soldout', [App\Http\Controllers\StockController::class, 'load_stock_almost_soldout']);
     Route::get('stock/manage', [App\Http\Controllers\StockController::class, 'index'])->name('stock');
     Route::get('admin/stock/get-data', [App\Http\Controllers\StockController::class, 'getData']);
     Route::get('admin/stock/get-soldout', [App\Http\Controllers\StockController::class, 'getSoldOut']);
@@ -57,6 +60,7 @@ Route::group(['middleware' => ['auth']], function() {
     Route::post('admin/category/destroy/{id}', [App\Http\Controllers\CategoryController::class, 'destroy']);
     Route::get('admin/customer', [App\Http\Controllers\AdminController::class, 'index'])->name('customer');
     Route::get('admin/partners', [App\Http\Controllers\AdminController::class, 'partner'])->name('partners');
+    Route::get('admin/capital', [App\Http\Controllers\AdminController::class, 'capital'])->name('capital');
     Route::post('admin/partner/save', [App\Http\Controllers\AdminController::class, 'add_partner']);
     Route::get('admin/partner/get-data', [App\Http\Controllers\AdminController::class, 'get_partners']);
     Route::get('admin/guide', [App\Http\Controllers\AdminController::class, 'guide'])->name('guide');

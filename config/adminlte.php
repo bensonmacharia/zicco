@@ -258,12 +258,12 @@ return [
             'url'         => 'order/manage',
             'icon'        => 'far fa-circle',
         ],
-        ['header' => 'STOCK'],
         [
-            'text'        => 'Summary',
-            'url'         => 'stock/summary',
-            'icon'        => 'far fa-circle text-info',
+            'text'        => 'In Shipment',
+            'url'         => 'order/shipping',
+            'icon'        => 'far fa-circle',
         ],
+        ['header' => 'STOCK'],
         [
             'text'        => 'Manage Stock',
             'url'         => 'stock/manage',
@@ -318,7 +318,7 @@ return [
         ],
         [
             'text'        => 'Share Capital',
-            'url'         => 'admin/partners',
+            'url'         => 'admin/capital',
             'icon'        => 'far fa-circle text-danger',
         ],
         ['header' => 'HELP'],

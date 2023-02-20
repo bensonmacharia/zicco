@@ -25,10 +25,10 @@
                         <tr>
                             <th>No</th>
                             <th>Product</th>
+                            <th>Remaining Units</th>
                             <th>Total Units</th>
                             <th>Sold Units</th>
                             <th>Spoilt</th>
-                            <th>Remaining Units</th>
                             <th>Total Sales</th>
                             <th>Credit Amount</th>
                             <th>Profit</th>
@@ -72,10 +72,10 @@ function loadSummaryStock(){
         columns: [
             {data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false,searchable: false},
             {data: 'product_name', name: 'product_name'},
+            {data: 'total_remaining', name: 'total_remaining'},
             {data: 'total_units', name: 'total_units'},
             {data: 'total_sold', name: 'total_sold'},
             {data: 'spoilt', name: 'spoilt'},
-            {data: 'total_remaining', name: 'total_remaining'},
             {data: 'total_sales', name: 'total_sales'},
             {data: 'total_balance', name: 'total_balance'},
             {data: 'total_profit', name: 'total_profit'},

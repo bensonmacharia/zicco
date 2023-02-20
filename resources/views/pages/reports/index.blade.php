@@ -156,7 +156,7 @@ function loadList() {
         },
         aLengthMenu: [[4, 10, 15, 20], [4, 10, 15, 20]],
         order: [[1, "desc"]],
-        pageLength: 10,
+        pageLength: 20,
         buttons: [
         ],
         initComplete: function (settings, json) {
@@ -233,7 +233,7 @@ function getSaleByDate()
             },
             aLengthMenu: [[4, 10, 15, 20], [4, 10, 15, 20]],
             order: [[1, "asc"]],
-            pageLength: 10,
+            pageLength: 20,
             buttons: [
             ],
             initComplete: function (settings, json) {

@@ -104,6 +104,7 @@ class StockController extends Controller {
             ->leftjoinSub($subQuery->toSql(), 'ps', function ($join) {
                 $join->on('ps.stock_id', '=', 'stocks.id');
             })
+            ->where("stocks.soldout", 0)
             ->groupBy('stocks.id')
             ->orderBy('stocks.created_at', 'desc')
             ->get();
@@ -145,6 +146,59 @@ class StockController extends Controller {
                 $sales_cost = ($data->total_cost*$data->total_sold/$data->total_units);
                 $profit = $data->total_sales - $sales_cost;
                 return 'KES. ' . number_format($profit, 0, ',', ',');
+            })
+            ->addIndexColumn()
+            ->make(true);
+    }
+
+    public function load_stock_almost_soldout() {
+        $subQuery = Sales::groupBy('sales.product_id')
+            ->select('sales.product_id')
+            ->selectRaw('SUM(sales.units) total_sold')
+            ->selectRaw('SUM(sales.total_price) total_sales')
+            ->selectRaw('SUM(sales.amnt_paid) total_paid');
+
+        $lastMonthSales = Sales::groupBy('sales.product_id')
+            ->select('sales.product_id')
+            ->selectRaw('SUM(sales.units) total_sold')
+            ->where('sales.created_at', '>', now()->subDays(30)->endOfDay());
+
+        $data = Stock::select('products.id as product_id', 'products.name as product_name','ps.total_sold','ps.total_sales','ps.total_paid')
+            ->selectRaw('SUM(stocks.units) as total_units')
+            ->selectRaw('SUM(stocks.spoilt) as total_spoilt')
+            ->selectRaw('COALESCE(SUM(stocks.units) - COALESCE(ps.total_sold,0) - SUM(stocks.spoilt),0) as total_balance')
+            ->selectRaw('(COALESCE(SUM(stocks.units) - COALESCE(ps.total_sold,0) - SUM(stocks.spoilt),0)/SUM(stocks.units)*100) as percentage')
+            ->join('products', 'products.id', '=', 'stocks.product_id')
+            ->leftjoinSub($subQuery->toSql(), 'ps', function ($join) {
+                $join->on('ps.product_id', '=', 'products.id');
+            })
+            ->groupBy('products.id')
+            ->orderBy('products.name')
+            ->having('percentage', '<', 35)
+            ->get();
+
+
+        return datatables()->of($data)
+            ->addColumn('product_id', function ($data) {
+                return isset($data->product_id) ? $data->product_id : '';
+            })
+            ->addColumn('product_name', function ($data) {
+                return isset($data->product_name) ? $data->product_name : '';
+            })
+            ->addColumn('total_units', function ($data) {
+                return isset($data->total_units) ? number_format($data->total_units, 0, ',', ',') : '';
+            })
+            ->addColumn('total_sold', function ($data) {
+                return isset($data->total_sold) ? number_format($data->total_sold, 0, ',', ',') : '';
+            })
+            ->addColumn('total_sales', function ($data) {
+                return $data->total_sales ? 'KES. ' . number_format($data->total_sales, 0, ',', ',') : '';
+            })
+            ->addColumn('total_remaining', function ($data) {
+                $all = $data->total_units;
+                $sold = $data->total_sold;
+                $balance = $all - $sold - $data->spoilt;
+                return number_format($balance, 0, ',', ',');
             })
             ->addIndexColumn()
             ->make(true);
