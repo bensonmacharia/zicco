@@ -54,6 +54,7 @@ class OrderController extends Controller
                     ->whereRaw('orders.product_id = stocks.product_id')
                     ->whereRaw('orders.batch = stocks.batch');
             })
+            ->orderBy('created_at', 'desc')
             ->get();
 
         //$data1 = Order::all()->sortByDesc('created_at')->values();
@@ -202,8 +203,10 @@ class OrderController extends Controller
         ]);
         $data_input = $req->all();
         if ($id) {
+            $action_type = 1;
             $data_input['updated_at'] = date('Y-m-d H:i:s');
         } else {
+            $action_type = 0;
             $data_input['created_at'] = date('Y-m-d H:i:s');
         }
 
@@ -219,9 +222,13 @@ class OrderController extends Controller
         $data_input['user_id'] = auth()->user()->id;
 
         $order = Order::updateOrCreate(['id' => $id], $data_input);
+        $paid = str_replace('.', '', $data_input['pcost']);
+        $module = "order";
+        $item_id = $order->id;
+        $cash = (new CashController())->calculateCash($module,$item_id,$action_type,$paid,$data_input['user_id']);
 
         $message = array();
-        if ($order) {
+        if ($order && $cash) {
             $message['message'] = 'Order recorded successfully';
 
             return response()->json($message)->setStatusCode(200);

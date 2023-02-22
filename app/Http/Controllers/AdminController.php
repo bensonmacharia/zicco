@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cash;
 use App\Models\Customer;
 use App\Models\Partner;
 use Illuminate\Http\Request;
@@ -54,9 +55,11 @@ class AdminController extends Controller {
         $laptop_current_value = 20000*((100 - (2*$laptop_age_months))/100);
         $laptop = $laptop_current_value;
 
-        $total = $shipment[0]->total_product_cost + $balance + $spoilt + $laptop;
+        $cash = Cash::orderBy('id', 'desc')->first()->amount;
 
-        return view('pages/admin/capital', compact('shipment', 'balance',  'spoilt', 'laptop', 'total'));
+        $total = $shipment[0]->total_product_cost + $balance + $spoilt + $laptop + $cash;
+
+        return view('pages/admin/capital', compact('shipment', 'balance',  'spoilt', 'laptop', 'cash', 'total'));
     }
 
     public function guide() {

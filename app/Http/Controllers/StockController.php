@@ -422,8 +422,10 @@ class StockController extends Controller {
         ]);
         $data_input = $req->all();
         if ($id) {
+            $action_type = 1;
             $data_input['updated_at'] = date('Y-m-d H:i:s');
         } else {
+            $action_type = 0;
             $data_input['created_at'] = date('Y-m-d H:i:s');
         }
         $data_input['pcost'] = str_replace('.', '', $data_input['pcost']);
@@ -432,8 +434,12 @@ class StockController extends Controller {
         $data_input['user_id'] = auth()->user()->id;
 
         $stock = Stock::updateOrCreate(['id' => $id], $data_input);
+        $paid = str_replace('.', '', $data_input['ccost']) + str_replace('.', '', $data_input['tcost']);
+        $module = "stock";
+        $item_id = $stock->id;
+        $cash = (new CashController())->calculateCash($module,$item_id,$action_type,$paid,$data_input['user_id']);
 
-        if ($stock) {
+        if ($stock && $cash) {
             $message = array();
             $message['message'] = 'Data saved successfully';
 

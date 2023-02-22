@@ -71,8 +71,10 @@ class ExpensesController extends Controller
         $data_input = $req->all();
 
         if($id) {
+            $action_type = 1;
             $data_input['updated_at'] = date('Y-m-d H:i:s');
         } else {
+            $action_type = 0;
             $data_input['created_at'] = date('Y-m-d H:i:s');
         }
 
@@ -80,13 +82,16 @@ class ExpensesController extends Controller
         $data_input['user_id'] = auth()->user()->id;
 
         $expense = Expense::updateOrCreate(['id' => $id], $data_input);
+        $module = "expense";
+        $item_id = $expense->id;
+        $cash = (new CashController())->calculateCash($module,$item_id,$action_type,$data_input['amount'],$data_input['user_id']);
 
-        if ($expense) {
+        if ($expense && $cash) {
             $message = array();
             $message['message'] = 'Data saved successfully';
 
             return response()->json($message)->setStatusCode(200);
-        }else{
+        } else{
 
             $message = array();
             $message['message'] = 'Data failed to save';

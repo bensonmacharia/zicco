@@ -2,14 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Expense;
 use App\Models\Product;
 use App\Models\Customer;
 use App\Models\Sales;
 use App\Models\Stock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class SalesController extends Controller {
 
@@ -86,8 +84,10 @@ class SalesController extends Controller {
 
         $data_input = $req->all();
         if ($id) {
+            $action_type = 1;
             $data_input['updated_at'] = date('Y-m-d H:i:s');
         } else {
+            $action_type = 0;
             $data_input['created_at'] = date('Y-m-d H:i:s');
         }
 
@@ -100,8 +100,12 @@ class SalesController extends Controller {
         $data_input['total_price'] = $req->units * $req->price;
 
         $sale = Sales::updateOrCreate(['id' => $id], $data_input);
+        $paid = $req->amnt_paid;
+        $module = "sale";
+        $item_id = $sale->id;
+        $cash = (new CashController())->calculateCash($module,$item_id,$action_type,$paid,$data_input['user_id']);
 
-        if ($sale) {
+        if ($sale && $cash) {
             $message = array();
             $message['message'] = 'Data saved successfully';
 

@@ -26,8 +26,8 @@
 
             </div>
             <div class="row">
-                <div class="card-body table-responsive p-0">
-                    <table class="table table-hover table-sm text-nowrap">
+                <div class="table-responsive mt-4">
+                    <table id="assets" class="table table-hover table-sm">
                         <tbody>
                         <tr>
                             <th>ITEM</th>
@@ -48,6 +48,10 @@
                         <tr>
                             <td>Business Laptop (*at 2% depreciation per month)</td>
                             <td>{{number_format($laptop)}}</td>
+                        </tr>
+                        <tr>
+                            <td>Cash in Hand</td>
+                            <td>{{number_format($cash)}}</td>
                         </tr>
                         <tr>
                             <td style="font-weight:bold">TOTAL</td>
