@@ -37,13 +37,13 @@ class AdminController extends Controller {
             ->get();
         $rem_pcost = DB::table('stocks')
             ->join('sales', 'stocks.id', '=', 'sales.stock_id')
-            ->selectRaw('(stocks.units - stocks.spoilt - SUM(sales.units))*(stocks.pcost/stocks.units) as remaining_pcost')
+            ->selectRaw('(stocks.units - stocks.spoilt - SUM(sales.units))*((stocks.pcost+stocks.ccost+stocks.tcost)/stocks.units) as remaining_pcost')
             ->where("stocks.soldout", 0)
             ->groupBy('stocks.id')
             ->get();
         $spoilt_pcost = DB::table('stocks')
             ->join('sales', 'stocks.id', '=', 'sales.stock_id')
-            ->selectRaw('stocks.spoilt*(stocks.pcost/stocks.units) as spoilt_pcost')
+            ->selectRaw('stocks.spoilt*((stocks.pcost+stocks.ccost+stocks.tcost)/stocks.units) as spoilt_pcost')
             ->groupBy('stocks.id')
             ->get();
         $balance = collect($rem_pcost)->sum('remaining_pcost');
@@ -82,13 +82,13 @@ class AdminController extends Controller {
             ->get();
         $rem_pcost = DB::table('stocks')
             ->join('sales', 'stocks.id', '=', 'sales.stock_id')
-            ->selectRaw('(stocks.units - stocks.spoilt - SUM(sales.units))*(stocks.pcost/stocks.units) as remaining_pcost')
+            ->selectRaw('(stocks.units - stocks.spoilt - SUM(sales.units))*((stocks.pcost+stocks.ccost+stocks.tcost)/stocks.units) as remaining_pcost')
             ->where("stocks.soldout", 0)
             ->groupBy('stocks.id')
             ->get();
         $spoilt_pcost = DB::table('stocks')
             ->join('sales', 'stocks.id', '=', 'sales.stock_id')
-            ->selectRaw('stocks.spoilt*(stocks.pcost/stocks.units) as spoilt_pcost')
+            ->selectRaw('stocks.spoilt*((stocks.pcost+stocks.ccost+stocks.tcost)/stocks.units) as spoilt_pcost')
             ->groupBy('stocks.id')
             ->get();
         $balance = collect($rem_pcost)->sum('remaining_pcost');
