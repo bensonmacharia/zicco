@@ -35,19 +35,11 @@ class AdminController extends Controller {
                     ->whereRaw('orders.batch = stocks.batch');
             })
             ->get();
-        $rem_pcost = DB::table('stocks')
-            ->join('sales', 'stocks.id', '=', 'sales.stock_id')
-            ->selectRaw('(stocks.units - stocks.spoilt - SUM(sales.units))*((stocks.pcost+stocks.ccost+stocks.tcost)/stocks.units) as remaining_pcost')
-            ->where("stocks.soldout", 0)
-            ->groupBy('stocks.id')
-            ->get();
-        $spoilt_pcost = DB::table('stocks')
-            ->join('sales', 'stocks.id', '=', 'sales.stock_id')
-            ->selectRaw('stocks.spoilt*((stocks.pcost+stocks.ccost+stocks.tcost)/stocks.units) as spoilt_pcost')
-            ->groupBy('stocks.id')
-            ->get();
+        $rem_pcost = DB::select("SELECT SUM(a.rcost) as remaining_pcost FROM (SELECT ((stocks.units - stocks.spoilt - coalesce(SUM(sales.units),0)) * ((stocks.pcost+stocks.ccost+stocks.tcost)/stocks.units)) as rcost FROM stocks LEFT JOIN sales ON stocks.id = sales.stock_id WHERE stocks.soldout = 0 GROUP BY stocks.id ORDER BY stocks.id) as a");
+        $spoilt_pcost = DB::select("SELECT SUM(a.spoilt_cost) as spoilt_pcost FROM (SELECT stocks.id, stocks.units, stocks.spoilt, (stocks.pcost+stocks.ccost+stocks.tcost)/stocks.units as rcost, (stocks.spoilt*((stocks.pcost+stocks.ccost+stocks.tcost)/stocks.units)) as spoilt_cost FROM stocks WHERE stocks.spoilt > 0) as a");
         $balance = collect($rem_pcost)->sum('remaining_pcost');
         $spoilt = collect($spoilt_pcost)->sum('spoilt_pcost')/2;
+        //var_dump($spoilt_pcost);die();
 
         $laptop_date = '2022-12-21';
         //$laptop_age_years = Carbon::parse($laptop_date)->age;
@@ -80,17 +72,8 @@ class AdminController extends Controller {
                     ->whereRaw('orders.batch = stocks.batch');
             })
             ->get();
-        $rem_pcost = DB::table('stocks')
-            ->join('sales', 'stocks.id', '=', 'sales.stock_id')
-            ->selectRaw('(stocks.units - stocks.spoilt - SUM(sales.units))*((stocks.pcost+stocks.ccost+stocks.tcost)/stocks.units) as remaining_pcost')
-            ->where("stocks.soldout", 0)
-            ->groupBy('stocks.id')
-            ->get();
-        $spoilt_pcost = DB::table('stocks')
-            ->join('sales', 'stocks.id', '=', 'sales.stock_id')
-            ->selectRaw('stocks.spoilt*((stocks.pcost+stocks.ccost+stocks.tcost)/stocks.units) as spoilt_pcost')
-            ->groupBy('stocks.id')
-            ->get();
+        $rem_pcost = DB::select("SELECT SUM(a.rcost) as remaining_pcost FROM (SELECT ((stocks.units - stocks.spoilt - coalesce(SUM(sales.units),0)) * ((stocks.pcost+stocks.ccost+stocks.tcost)/stocks.units)) as rcost FROM stocks LEFT JOIN sales ON stocks.id = sales.stock_id WHERE stocks.soldout = 0 GROUP BY stocks.id ORDER BY stocks.id) as a");
+        $spoilt_pcost = DB::select("SELECT SUM(a.spoilt_cost) as spoilt_pcost FROM (SELECT stocks.id, stocks.units, stocks.spoilt, (stocks.pcost+stocks.ccost+stocks.tcost)/stocks.units as rcost, (stocks.spoilt*((stocks.pcost+stocks.ccost+stocks.tcost)/stocks.units)) as spoilt_cost FROM stocks WHERE stocks.spoilt > 0) as a");
         $balance = collect($rem_pcost)->sum('remaining_pcost');
         $spoilt = collect($spoilt_pcost)->sum('spoilt_pcost')/2;
 
@@ -100,7 +83,9 @@ class AdminController extends Controller {
         $laptop_current_value = 20000*((100 - (2*$laptop_age_months))/100);
         $laptop = $laptop_current_value;
 
-        $total = $shipment[0]->total_product_cost + $balance + $spoilt + $laptop;
+        $cash = Cash::orderBy('id', 'desc')->first()->amount;
+
+        $total = $shipment[0]->total_product_cost + $balance + $spoilt + $laptop + $cash;
 
         return $total;
     }
