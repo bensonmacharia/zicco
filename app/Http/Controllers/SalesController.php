@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Shop;
 use App\Models\Product;
 use App\Models\Customer;
 use App\Models\Sales;
@@ -12,10 +13,10 @@ use Illuminate\Support\Facades\DB;
 class SalesController extends Controller {
 
     public function index() {
-        //$product = Product::all()->sortBy('name')->values();
+        $shop = Shop::all()->sortBy('id')->values();
         $stock = Stock::all()->sortBy('product.name')->where('batch', '!=', 0)->where('soldout', 0)->values();
         $customer = Customer::all()->sortBy('name')->values();
-        return view('pages/sales/index', compact('stock', 'customer'));
+        return view('pages/sales/index', compact('shop','stock', 'customer'));
     }
 
     public function updateStockSales(){
@@ -48,6 +49,9 @@ class SalesController extends Controller {
                         ->addColumn('customer', function ($data) {
                             return isset($data->customer->name) ? $data->customer->name : '';
                         })
+                        ->addColumn('shop', function ($data) {
+                            return isset($data->shop->name) ? $data->shop->name : '';
+                        })
                         ->addColumn('paid', function ($data) {
                             return $data->amnt_paid ? 'KES. ' . number_format($data->amnt_paid, 0, ',', ',') : '';
                         })
@@ -77,6 +81,7 @@ class SalesController extends Controller {
             'units' => 'required|max:20',
             'price' => 'required|max:20',
             'customer_id' => 'required',
+            'shop_id' => 'required',
             'amnt_paid' => 'required',
             'rcpt_no' => 'max:20',
             'inv_no' => 'max:20',

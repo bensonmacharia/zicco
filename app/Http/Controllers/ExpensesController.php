@@ -3,13 +3,15 @@
 namespace App\Http\Controllers;
 
 use App\Models\Expense;
+use App\Models\Shop;
 use Illuminate\Http\Request;
 
 class ExpensesController extends Controller
 {
     public function index() {
         $expenses = Expense::all()->sortBy('name')->values();
-        return view('pages/expense/index', compact('expenses'));
+        $shop = Shop::all()->sortBy('id')->values();
+        return view('pages/expense/index', compact('shop','expenses'));
     }
 
     public function getData() {
@@ -46,6 +48,9 @@ class ExpensesController extends Controller
             ->addColumn('expense_amount', function ($data) {
                 return $data->amount ? 'KES. ' . number_format($data->amount, 0, ',', ',') : '';
             })
+            ->addColumn('shop', function ($data) {
+                return isset($data->shop->name) ? $data->shop->name : '';
+            })
             ->addColumn('added_by', function ($data) {
                 return isset($data->user->username) ? $data->user->username : '';
             })
@@ -65,6 +70,7 @@ class ExpensesController extends Controller
                 'expense_type' => 'required',
                 'description' => 'required',
                 'amount' => 'required',
+                'shop_id' => 'required',
             ]);
         }
 

@@ -35,6 +35,7 @@
                             <th>Paid</th>
                             <th>Balance</th>
                             <th>Receipt</th>
+                            <th>Shop</th>
                             <th>Date</th>
                             <th>Action</th>
                         </tr>
@@ -60,9 +61,20 @@
                 <div class="modal-body">
                     <div class="form-group row">
                         <input type="hidden" id="id" name="id">
+                        <label for="shop_id" class="col-sm-3 col-form-label">Shop *</label>
+                        <div class="col-sm-9">
+                            <select class="form-control select2" id="shop_id" name="shop_id" style="width:50%">
+                                <option value=''>--Select--</option>
+                                @foreach($shop as $row)
+                                <option value="{{ $row->id }}">{{ $row->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
                         <label for="stock_id" class="col-sm-3 col-form-label">Product *</label>
                         <div class="col-sm-9">
-                            <select class="form-control select2" id="stock_id" name="stock_id" style="width:50%">
+                            <select class="form-control select2" id="stock_id" name="stock_id" style="width:80%">
                                 <option value=''>--Select--</option>
                                 @foreach($stock as $row)
                                 <option value="{{ $row->id }}">{{ $row->batch." - ".$row->product->name }}</option>
@@ -175,6 +187,7 @@ function loadList() {
             {data: 'paid', name: 'paid'},
             {data: 'balance', name: 'balance'},
             {data: 'rcpt_no', name: 'rcpt_no'},
+            {data: 'shop', name: 'shop'},
             {data: 'date_added', name: 'date_added'},
             { "data": null,"sortable": false,
                 render: function (data, type, row, meta) {
@@ -185,7 +198,9 @@ function loadList() {
                                     data-units = '+row.units+' \
                                     data-price = '+row.price+' \
                                     data-amnt_paid = '+row.amnt_paid+' \
-                                    data-rcpt_no = \''+row.rcpt_no+'\' \
+                                    data-rcpt_no = '+row.rcpt_no+' \
+                                    data-shop = '+row.shop+' \
+                                    data-inv_no = '+row.inv_no+' \
                                 onclick="editSale(this)" data-toggle="modal" data-target="#InputModal"><i class="fa fa-edit"></i> edit</a>&nbsp;';
                         return result;
                 }
@@ -217,6 +232,7 @@ function editSale(e) {
         $('#customer_id').val($(e).data('customer_id')).trigger('change');
         $('#amnt_paid').val($(e).data('amnt_paid'));
         $('#rcpt_no').val($(e).data('rcpt_no'));
+        $('#shop_id').val($(e).data('shop_id'));
         $('#inv_no').val($(e).data('inv_no'));
 
         $('.alert').hide();
@@ -225,6 +241,7 @@ function editSale(e) {
   function saveSale()
   {
     let id = document.getElementById('id').value;
+    let shop_id = $('#shop_id').val();
     let stock_id = $('#stock_id').val();
     let units = document.getElementById('units').value;
     let price = document.getElementById('price').value;
@@ -237,11 +254,12 @@ function editSale(e) {
 
     if(units == ''){
           Swal.fire("Error!", "Units are required", "error");
-       }else{
+       } else{
         // swalLoading();
            document.getElementById("submitSale").disabled = true;
             var form_data = new FormData();
                 form_data.append('id', id);
+                form_data.append('shop_id', shop_id);
                 form_data.append('stock_id', stock_id);
                 form_data.append('units', units);
                 form_data.append('price', price);
@@ -328,6 +346,7 @@ function resetForm(){
     $('#customer_id').val('').trigger('change');
     $('#amnt_paid').val('');
     $('#rcpt_no').val('');
+    $('#shop_id').val('').trigger('change');
     $('#inv_no').val('');
     $('.alert').hide();
     $('#formSale').trigger("reset");

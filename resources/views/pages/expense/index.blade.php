@@ -32,6 +32,7 @@
                         <th>Type</th>
                         <th>Amount</th>
                         <th>Description</th>
+                        <th>Shop</th>
                         <th>Date</th>
                         <th>Action</th>
                     </tr>
@@ -56,8 +57,19 @@
                 <input type="hidden" name="_token" value="{{ csrf_token() }}">
                 <div class="modal-body">
                     <div class="form-group row">
-                        <label for="payment" class="col-sm-3 col-form-label">Expense Type *</label>
                         <input type="hidden" id="id" name="id">
+                        <label for="shop_id" class="col-sm-3 col-form-label">Shop *</label>
+                        <div class="col-sm-9">
+                            <select class="form-control select2" id="shop_id" name="shop_id" style="width:50%">
+                                <option value=''>--Select--</option>
+                                @foreach($shop as $row)
+                                <option value="{{ $row->id }}">{{ $row->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="payment" class="col-sm-3 col-form-label">Expense Type *</label>
                         <div class="col-sm-9">
                             <select class="form-control select2" id="expense_type" name="expense_type"
                                     style="width:80%">
@@ -136,6 +148,7 @@
                 {data: 'expense_category', name: 'expense_type'},
                 {data: 'expense_amount', name: 'amount'},
                 {data: 'description', name: 'description'},
+                {data: 'shop', name: 'shop'},
                 {data: 'date_added', name: 'date_added'},
                 {
                     "data": null, "sortable": false,
@@ -145,6 +158,7 @@
                                     data-expense_type =  \'' + row.expense_type + '\' \
                                     data-amount = \''+row.amount+'\' \
                                     data-description =  \'' + row.description + '\' \
+                                    data-shop_id =  \'' + row.shop_id + '\' \
                                     data-date_added =  \'' + row.date_added + '\' \
                                 onclick="editExpense(this)" data-toggle="modal" data-target="#InputModal"><i class="fa fa-edit"></i> edit</a>&nbsp;';
                         return result;
@@ -173,6 +187,7 @@
         $('#expense_type').val($(e).data('expense_type')).trigger('change');
         $('#amount').val($(e).data('amount'));
         $('#description').val($(e).data('description'));
+        $('#shop_id').val($(e).data('shop_id'));
     }
 
     function saveExpense() {
@@ -180,6 +195,7 @@
         let expense_type = $('#expense_type').val();
         let amount = document.getElementById('amount').value;
         let description = document.getElementById('description').value;
+        let shop_id = $('#shop_id').val();
 
         var url = "{{ url('admin/expense/save') }}";
 
@@ -195,6 +211,7 @@
             form_data.append('expense_type', expense_type);
             form_data.append('amount', amount);
             form_data.append('description', description);
+            form_data.append('shop_id', shop_id);
 
             $.ajax({
                 type: "POST",
