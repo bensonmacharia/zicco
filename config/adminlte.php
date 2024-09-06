@@ -310,7 +310,12 @@ return [
             'text'        => 'Debtors',
             'url'         => 'report/sales/debtors',
         ],
-        ['header' => 'PARTNER'],
+        ['header' => 'ADMIN'],
+        [
+            'text'        => 'Manage Shops',
+            'url'         => 'admin/shops',
+            'icon'        => 'far fa-circle text-danger',
+        ],
         [
             'text'        => 'Manage Partners',
             'url'         => 'admin/partners',
@@ -455,7 +460,7 @@ return [
                 [
                     'type' => 'js',
                     'asset' => false,
-                    'location' => '//cdn.ckeditor.com/4.16.2/standard/ckeditor.js',
+                    'location' => '//cdn.ckeditor.com/4.22.1/standard/ckeditor.js',
                 ],
             ],
         ],

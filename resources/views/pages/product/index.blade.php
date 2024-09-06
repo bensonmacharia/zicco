@@ -63,7 +63,7 @@
           <div class="form-group row">
             <label for="description" class="col-sm-3 col-form-label">Description *</label>
             <div class="col-sm-8">
-                <textarea class="form-control" autocomplete="off" id="description" name="description"></textarea>
+                <textarea class="form-control" autocomplete="off" id="description" name="description" placeholder="Product description"></textarea>
             </div>
           </div>
           <div class="form-group row">
@@ -147,7 +147,7 @@
 @section('js')
 <script type="text/javascript">
 $(".select2").select2();
-CKEDITOR.replace( 'description' );
+//CKEDITOR.replace( 'description' );
 
 $(document).ready(function(){
   $.ajaxSetup({
@@ -214,7 +214,8 @@ function loadList() {
 function editProduct(e) {
         $('#id').val($(e).data('id'));
         $('#name').val($(e).data('name'));
-        CKEDITOR.instances.description.setData($(e).data('description'));
+        $('#description').val($(e).data('description'));
+        //CKEDITOR.instances.description.setData($(e).data('description'));
         $('#price').val($(e).data('price'));
         $('#category_id').val($(e).data('category_id')).trigger('change');
 
@@ -231,7 +232,8 @@ function editProduct(e) {
   {
     let id = document.getElementById('id').value;
     let name = document.getElementById('name').value;
-    let description = CKEDITOR.instances['description'].getData();
+    let description = document.getElementById('description').value;
+    //let description = CKEDITOR.instances['description'].getData();
     let price = document.getElementById('price').value;
     let category_id = $('#category_id').val();
     let image = document.getElementById("input").files[0];
@@ -324,7 +326,8 @@ function editProduct(e) {
 function resetForm(){
     $('#id').val('');
     $('#name').val('');
-    CKEDITOR.instances.description.setData('');
+    $('#description').val('');
+    //CKEDITOR.instances.description.setData('');
     $('#price').val('');
     $('#input').val('');
     $('#category_id').val('').trigger('change');

@@ -23,7 +23,7 @@ Route::get('/home/user-guide', function () {
 Auth::routes();
 //Auth::routes(['register' => false]);
 
-Route::group(['middleware' => ['auth']], function() {
+Route::group(['middleware' => ['auth']], function () {
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
     Route::get('home/get_stock_summaries', [App\Http\Controllers\HomeController::class, 'get_stock_summaries']);
     Route::get('product/manage', [App\Http\Controllers\ProductController::class, 'index'])->name('product');
@@ -60,9 +60,12 @@ Route::group(['middleware' => ['auth']], function() {
     Route::post('admin/category/destroy/{id}', [App\Http\Controllers\CategoryController::class, 'destroy']);
     Route::get('admin/customer', [App\Http\Controllers\AdminController::class, 'index'])->name('customer');
     Route::get('admin/partners', [App\Http\Controllers\AdminController::class, 'partner'])->name('partners');
+    Route::get('admin/shops', [App\Http\Controllers\AdminController::class, 'shop'])->name('shops');
     Route::get('admin/capital', [App\Http\Controllers\AdminController::class, 'capital'])->name('capital');
     Route::post('admin/partner/save', [App\Http\Controllers\AdminController::class, 'add_partner']);
     Route::get('admin/partner/get-data', [App\Http\Controllers\AdminController::class, 'get_partners']);
+    Route::post('admin/shop/save', [App\Http\Controllers\AdminController::class, 'add_shop']);
+    Route::get('admin/shop/get-data', [App\Http\Controllers\AdminController::class, 'get_shops']);
     Route::get('admin/guide', [App\Http\Controllers\AdminController::class, 'guide'])->name('guide');
     Route::get('admin/customer/get-data', [App\Http\Controllers\AdminController::class, 'getData']);
     Route::post('admin/customer/save', [App\Http\Controllers\AdminController::class, 'store']);

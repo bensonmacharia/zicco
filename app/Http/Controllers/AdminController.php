@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Cash;
 use App\Models\Customer;
 use App\Models\Partner;
+use App\Models\Shop;
 use Illuminate\Http\Request;
 use File;
 use Illuminate\Support\Facades\DB;
@@ -20,6 +21,10 @@ class AdminController extends Controller {
     public function partner() {
         //$customer = Customer::all()->sortByDesc('created_at')->values();
         return view('pages/admin/partner');
+    }
+
+    public function shop() {
+        return view('pages/admin/shop');
     }
 
     public function capital() {
@@ -134,6 +139,16 @@ class AdminController extends Controller {
             ->make(true);
     }
 
+    public function get_shops(){
+        $data = Shop::all()->sortBy('id')->values();
+        return datatables()->of($data)
+            ->addColumn('date_added', function ($data) {
+                return isset($data->created_at) ? $data->created_at : '';
+            })
+            ->addIndexColumn()
+            ->make(true);
+    }
+
     public function store(Request $req) {
         $id = $req->id ?: 0;
 
@@ -192,6 +207,36 @@ class AdminController extends Controller {
 
         $message = array();
         if ($partner) {
+            $message['message'] = 'Data saved successfully';
+
+            return response()->json($message)->setStatusCode(200);
+        } else {
+
+            $message['message'] = 'Data failed to save';
+
+            return response()->json($message)->setStatusCode(400);
+        }
+    }
+
+    public function add_shop(Request $req) {
+        $id = $req->id ?: 0;
+
+        $validated = $req->validate([
+            'name' => 'required|unique:products|max:50',
+            'location' => 'required',
+        ]);
+
+        $data_input = $req->all();
+        if ($id) {
+            $data_input['updated_at'] = date('Y-m-d H:i:s');
+        } else {
+            $data_input['created_at'] = date('Y-m-d H:i:s');
+        }
+
+        $shop = Shop::updateOrCreate(['id' => $id], $data_input);
+
+        $message = array();
+        if ($shop) {
             $message['message'] = 'Data saved successfully';
 
             return response()->json($message)->setStatusCode(200);

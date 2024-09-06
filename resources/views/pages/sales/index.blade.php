@@ -199,7 +199,7 @@ function loadList() {
                                     data-price = '+row.price+' \
                                     data-amnt_paid = '+row.amnt_paid+' \
                                     data-rcpt_no = '+row.rcpt_no+' \
-                                    data-shop = '+row.shop+' \
+                                    data-shop_id = '+row.shop_id+' \
                                     data-inv_no = '+row.inv_no+' \
                                 onclick="editSale(this)" data-toggle="modal" data-target="#InputModal"><i class="fa fa-edit"></i> edit</a>&nbsp;';
                         return result;
@@ -232,7 +232,7 @@ function editSale(e) {
         $('#customer_id').val($(e).data('customer_id')).trigger('change');
         $('#amnt_paid').val($(e).data('amnt_paid'));
         $('#rcpt_no').val($(e).data('rcpt_no'));
-        $('#shop_id').val($(e).data('shop_id'));
+        $('#shop_id').val($(e).data('shop_id')).trigger('change');
         $('#inv_no').val($(e).data('inv_no'));
 
         $('.alert').hide();

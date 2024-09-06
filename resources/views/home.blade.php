@@ -93,22 +93,31 @@
             </div>
             <div class="card-body table-responsive p-0">
                 <table class="table table-hover table-sm text-nowrap">
+                    <tr>
+                        <th></th>
+                        <th>Shop A</th>
+                        <th>Shop B</th>
+                    </tr>
                     <tbody>
                     <tr>
                         <th>Total Sales</th>
-                        <td>{{"KES. ".number_format($ctods[0]->total_sales)}}</td>
+                        <td>{{"KES. ".number_format($ctods1[0]->total_sales)}}</td>
+                        <td>{{"KES. ".number_format($ctods2[0]->total_sales)}}</td>
                     </tr>
                     <tr>
                         <th>Total Cost</th>
-                        <td>{{"KES. ".number_format($ctodc[0]->total_cost)}}</td>
+                        <td>{{"KES. ".number_format($ctodc1[0]->total_cost)}}</td>
+                        <td>{{"KES. ".number_format($ctodc2[0]->total_cost)}}</td>
                     </tr>
                     <tr>
                         <th>Total Expenses</th>
-                        <td>{{"KES. ".number_format($ctode[0]->total_expenses)}}</td>
+                        <td>{{"KES. ".number_format($ctode1[0]->total_expenses)}}</td>
+                        <td>{{"KES. ".number_format($ctode2[0]->total_expenses)}}</td>
                     </tr>
                     <tr>
                         <th>Total Profit</th>
-                        <td>{{"KES. ".number_format($profit_tod)}}</td>
+                        <td>{{"KES. ".number_format($profit_tod1)}}</td>
+                        <td>{{"KES. ".number_format($profit_tod2)}}</td>
                     </tr>
                     </tbody>
                 </table>
@@ -130,22 +139,31 @@
             </div>
             <div class="card-body table-responsive p-0">
                 <table class="table table-hover table-sm text-nowrap">
+                    <tr>
+                        <th></th>
+                        <th>Shop A</th>
+                        <th>Shop B</th>
+                    </tr>
                     <tbody>
                     <tr>
                         <th>Total Sales</th>
-                        <td>{{"KES. ".number_format($cmons[0]->total_sales)}}</td>
+                        <td>{{"KES. ".number_format($cmons1[0]->total_sales)}}</td>
+                        <td>{{"KES. ".number_format($cmons2[0]->total_sales)}}</td>
                     </tr>
                     <tr>
                         <th>Total Cost</th>
-                        <td>{{"KES. ".number_format($cmonc[0]->total_cost)}}</td>
+                        <td>{{"KES. ".number_format($cmonc1[0]->total_cost)}}</td>
+                        <td>{{"KES. ".number_format($cmonc2[0]->total_cost)}}</td>
                     </tr>
                     <tr>
                         <th>Total Expenses</th>
-                        <td>{{"KES. ".number_format($cmone[0]->total_expenses)}}</td>
+                        <td>{{"KES. ".number_format($cmone1[0]->total_expenses)}}</td>
+                        <td>{{"KES. ".number_format($cmone2[0]->total_expenses)}}</td>
                     </tr>
                     <tr>
                         <th>Total Profit</th>
-                        <td>{{"KES. ".number_format($profit_mon)}}</td>
+                        <td>{{"KES. ".number_format($profit_mon1)}}</td>
+                        <td>{{"KES. ".number_format($profit_mon2)}}</td>
                     </tr>
                     </tbody>
                 </table>
@@ -184,20 +202,21 @@
     $(document).ready(function(){
         loadSummarySalesCreditChart();
         loadSummarySalesWeekly();
-        var mont = {!! json_encode($mont) !!};
-        loadNetProfitTrendGraph(mont);
+        var mont1 = {!! json_encode($mont1) !!};
+        var mont2 = {!! json_encode($mont2) !!};
+        loadNetProfitTrendGraph(mont1, mont2);
         loadAlmostSoldOutStock();
         //console.log(mont[0]['month']+" "+mont[0]['year']);
         //console.log({{$credit}});
     });
 
-    function loadNetProfitTrendGraph(mont){
+    function loadNetProfitTrendGraph(mont1, mont2){
         var salesGraphChartCanvas = $('#line-chart').get(0).getContext('2d');
         var salesGraphChartData = {
-            labels: [mont[0]['month']+" "+mont[0]['year'], mont[1]['month']+" "+mont[1]['year'], mont[2]['month']+" "+mont[2]['year'], mont[3]['month']+" "+mont[3]['year'], mont[4]['month']+" "+mont[4]['year'], mont[5]['month']+" "+mont[5]['year'], mont[6]['month']+" "+mont[6]['year'], mont[7]['month']+" "+mont[7]['year']],
+            labels: [mont1[0]['month']+" "+mont1[0]['year'], mont1[1]['month']+" "+mont1[1]['year'], mont1[2]['month']+" "+mont1[2]['year'], mont1[3]['month']+" "+mont1[3]['year'], mont1[4]['month']+" "+mont1[4]['year'], mont1[5]['month']+" "+mont1[5]['year'], mont1[6]['month']+" "+mont1[6]['year'], mont1[7]['month']+" "+mont1[7]['year']],
             datasets: [
                 {
-                    label: 'Net Profit',
+                    label: 'Shop A',
                     fill: false,
                     borderWidth: 2,
                     lineTension: 0,
@@ -207,7 +226,20 @@
                     pointHoverRadius: 7,
                     pointColor: '#efefef',
                     pointBackgroundColor: '#00a65a',
-                    data: [mont[0]['profit'], mont[1]['profit'], mont[2]['profit'], mont[3]['profit'], mont[4]['profit'], mont[5]['profit'], mont[6]['profit'], mont[7]['profit']]
+                    data: [mont1[0]['profit'], mont1[1]['profit'], mont1[2]['profit'], mont1[3]['profit'], mont1[4]['profit'], mont1[5]['profit'], mont1[6]['profit'], mont1[7]['profit']]
+                },
+                {
+                    label: 'Shop B',
+                    fill: false,
+                    borderWidth: 2,
+                    lineTension: 0,
+                    spanGaps: true,
+                    borderColor: '#b2beb5',
+                    pointRadius: 3,
+                    pointHoverRadius: 7,
+                    pointColor: '#efefef',
+                    pointBackgroundColor: '#b2beb5',
+                    data: [mont2[0]['profit'], mont2[1]['profit'], mont2[2]['profit'], mont2[3]['profit'], mont2[4]['profit'], mont2[5]['profit'], mont2[6]['profit'], mont2[7]['profit']]
                 }
             ]
         }
@@ -231,7 +263,7 @@
                 }],
                 yAxes: [{
                     ticks: {
-                        stepSize: 20000,
+                        stepSize: 50000,
                         fontColor: '#3b8bba'
                     },
                     gridLines: {
@@ -289,7 +321,7 @@
             labels  : ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
             datasets: [
               {
-                label               : 'Sales',
+                label               : 'Shop A',
                 backgroundColor     : 'rgba(60,141,188,0.9)',
                 borderColor         : 'rgba(60,141,188,0.8)',
                 pointRadius         : false,
@@ -297,7 +329,18 @@
                 pointStrokeColor    : 'rgba(60,141,188,1)',
                 pointHighlightFill  : '#fff',
                 pointHighlightStroke: 'rgba(60,141,188,1)',
-                data                : [{{$mon}}, {{$tue}}, {{$wed}}, {{$thu}}, {{$fri}}, {{$sat}}, {{$sun}}]
+                data                : [{{$mon1}}, {{$tue1}}, {{$wed1}}, {{$thu1}}, {{$fri1}}, {{$sat1}}, {{$sun1}}]
+              },
+              {
+                label               : 'Shop B',
+                backgroundColor     : 'rgba(210, 214, 222, 1)',
+                borderColor         : 'rgba(210, 214, 222, 1)',
+                pointRadius         : false,
+                pointColor          : 'rgba(210, 214, 222, 1)',
+                pointStrokeColor    : '#c1c7d1',
+                pointHighlightFill  : '#fff',
+                pointHighlightStroke: 'rgba(220,220,220,1)',
+                data                : [{{$mon2}}, {{$tue2}}, {{$wed2}}, {{$thu2}}, {{$fri2}}, {{$sat2}}, {{$sun2}}]
               },
             ]
         }
@@ -343,8 +386,8 @@
                 sLengthMenu: "_MENU_",
                 sSearch: ""
             },
-            aLengthMenu: [[4, 10, 15, 20], [4, 10, 15, 20]],
-            pageLength: 20,
+            aLengthMenu: [[5, 10, 15, 20], [4, 10, 15, 20]],
+            pageLength: 5,
             buttons: [
             ],
             initComplete: function (settings, json) {
