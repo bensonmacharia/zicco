@@ -28,151 +28,246 @@ class HomeController extends Controller
      */
     public function index()
     {
-        $period = now()->subMonths(7)->monthsUntil(now());
-        $mont1 = [];
-        $mont2 = [];
-        foreach ($period as $date) {
-            $mont1[] = [
-                'month' => $date->shortMonthName,
-                'year' => $date->year,
-                'profit' => $this->profitPerMonthA($date->month, $date->year),
-            ];
-            $mont2[] = [
-                'month' => $date->shortMonthName,
-                'year' => $date->year,
-                'profit' => $this->profitPerMonthB($date->month, $date->year),
-            ];
-        }
-        //var_dump($mont);
-        //var_dump(json_decode($months[1]['month'])." ".json_decode($months[1]['year']));
+        // Get monthly profits for each shop for the last 8 months
+        $month_profits = $this->getShopProfitPerMonth();
+        $montpA = $month_profits['shop1'];
+        $montpB = $month_profits['shop2'];
+        $montpC = $month_profits['shop3'];
+
+        // Get weekly sales for each shop
+        $weekly_sales = $this->weeklySales();
+
+        // Get total sales, cash sales, credit sales
         $sales = Sales::sum('total_price');
         $cash = Sales::sum('amnt_paid');
         $credit = $sales - $cash;
-        $now = Carbon::now();
-        $weekStartDate = $now->startOfWeek()->format('Y-m-d');
-        $weekEndDate = $now->endOfWeek()->format('Y-m-d');
-        $cmons1 = Sales::selectRaw('SUM(sales.total_price) total_sales')
-            ->whereYear('sales.created_at', Carbon::now()->year)
-            ->whereMonth('sales.created_at', Carbon::now()->month)
-            ->where('shop_id', 1)
-            ->get();
-        $cmons2 = Sales::selectRaw('SUM(sales.total_price) total_sales')
-            ->whereYear('sales.created_at', Carbon::now()->year)
-            ->whereMonth('sales.created_at', Carbon::now()->month)
-            ->where('shop_id', 2)
-            ->get();
-        $cmonc1 = Sales::selectRaw('ROUND(SUM(sales.units/stocks.units*(stocks.pcost+stocks.ccost+stocks.tcost)), 0) total_cost')
-            ->join('stocks', 'stocks.id', '=', 'sales.stock_id')
-            ->whereYear('sales.created_at', Carbon::now()->year)
-            ->whereMonth('sales.created_at', Carbon::now()->month)
-            ->where('shop_id', 1)
-            ->get();
-        $cmonc2 = Sales::selectRaw('ROUND(SUM(sales.units/stocks.units*(stocks.pcost+stocks.ccost+stocks.tcost)), 0) total_cost')
-            ->join('stocks', 'stocks.id', '=', 'sales.stock_id')
-            ->whereYear('sales.created_at', Carbon::now()->year)
-            ->whereMonth('sales.created_at', Carbon::now()->month)
-            ->where('shop_id', 2)
-            ->get();
-        $cmone1 = Expense::selectRaw('SUM(expenses.amount) total_expenses')
-            ->whereYear('expenses.created_at', Carbon::now()->year)
-            ->whereMonth('expenses.created_at', Carbon::now()->month)
-            ->where('shop_id', 1)
-            ->get();
-        $cmone2 = Expense::selectRaw('SUM(expenses.amount) total_expenses')
-            ->whereYear('expenses.created_at', Carbon::now()->year)
-            ->whereMonth('expenses.created_at', Carbon::now()->month)
-            ->where('shop_id', 2)
-            ->get();
-        $ctods1 = Sales::selectRaw('SUM(sales.total_price) total_sales')
-            ->whereDate('sales.created_at', Carbon::today()->format('Y-m-d'))
-            ->where('shop_id', 1)
-            ->get();
-        $ctods2 = Sales::selectRaw('SUM(sales.total_price) total_sales')
-            ->whereDate('sales.created_at', Carbon::today()->format('Y-m-d'))
-            ->where('shop_id', 2)
-            ->get();
-        $ctodc1 = Sales::selectRaw('ROUND(SUM(sales.units/stocks.units*(stocks.pcost+stocks.ccost+stocks.tcost)), 0) total_cost')
-            ->join('stocks', 'stocks.id', '=', 'sales.stock_id')
-            ->whereDate('sales.created_at', Carbon::today()->format('Y-m-d'))
-            ->where('shop_id', 1)
-            ->get();
-        $ctodc2 = Sales::selectRaw('ROUND(SUM(sales.units/stocks.units*(stocks.pcost+stocks.ccost+stocks.tcost)), 0) total_cost')
-            ->join('stocks', 'stocks.id', '=', 'sales.stock_id')
-            ->whereDate('sales.created_at', Carbon::today()->format('Y-m-d'))
-            ->where('shop_id', 2)
-            ->get();
-        $ctode1 = Expense::selectRaw('SUM(expenses.amount) total_expenses')
-            ->whereDate('expenses.created_at', Carbon::today()->format('Y-m-d'))
-            ->where('shop_id', 1)
-            ->get();
-        $ctode2 = Expense::selectRaw('SUM(expenses.amount) total_expenses')
-            ->whereDate('expenses.created_at', Carbon::today()->format('Y-m-d'))
-            ->where('shop_id', 2)
-            ->get();
-        $profit_mon1 = $cmons1[0]->total_sales - $cmonc1[0]->total_cost - $cmone1[0]->total_expenses;
-        $profit_mon2 = $cmons2[0]->total_sales - $cmonc2[0]->total_cost - $cmone2[0]->total_expenses;
-        $profit_tod1 = $ctods1[0]->total_sales - $ctodc1[0]->total_cost - $ctode1[0]->total_expenses;
-        $profit_tod2 = $ctods2[0]->total_sales - $ctodc2[0]->total_cost - $ctode2[0]->total_expenses;
-        $mon1 = Sales::whereDate('created_at', $weekStartDate)->where('shop_id', 1)->sum('total_price');
-        $mon2 = Sales::whereDate('created_at', $weekStartDate)->where('shop_id', 2)->sum('total_price');
-        $tue1 = Sales::whereDate('created_at', $now->startOfWeek()->addDays(1)->format('Y-m-d'))->where('shop_id', 1)->sum('total_price');
-        $tue2 = Sales::whereDate('created_at', $now->startOfWeek()->addDays(1)->format('Y-m-d'))->where('shop_id', 2)->sum('total_price');
-        $wed1 = Sales::whereDate('created_at', $now->startOfWeek()->addDays(2)->format('Y-m-d'))->where('shop_id', 1)->sum('total_price');
-        $wed2 = Sales::whereDate('created_at', $now->startOfWeek()->addDays(2)->format('Y-m-d'))->where('shop_id', 2)->sum('total_price');
-        $thu1 = Sales::whereDate('created_at', $now->startOfWeek()->addDays(3)->format('Y-m-d'))->where('shop_id', 1)->sum('total_price');
-        $thu2 = Sales::whereDate('created_at', $now->startOfWeek()->addDays(3)->format('Y-m-d'))->where('shop_id', 2)->sum('total_price');
-        $fri1 = Sales::whereDate('created_at', $now->startOfWeek()->addDays(4)->format('Y-m-d'))->where('shop_id', 1)->sum('total_price');
-        $fri2 = Sales::whereDate('created_at', $now->startOfWeek()->addDays(4)->format('Y-m-d'))->where('shop_id', 2)->sum('total_price');
-        $sat1 = Sales::whereDate('created_at', $now->startOfWeek()->addDays(5)->format('Y-m-d'))->where('shop_id', 1)->sum('total_price');
-        $sat2 = Sales::whereDate('created_at', $now->startOfWeek()->addDays(5)->format('Y-m-d'))->where('shop_id', 2)->sum('total_price');
-        $sun1 = Sales::whereDate('created_at', $now->startOfWeek()->addDays(6)->format('Y-m-d'))->where('shop_id', 1)->sum('total_price');
-        $sun2 = Sales::whereDate('created_at', $now->startOfWeek()->addDays(6)->format('Y-m-d'))->where('shop_id', 2)->sum('total_price');
-        return view('home', compact('cash', 'credit', 'mon1', 'mon2', 'tue1', 'tue2', 'wed1', 'wed2', 'thu1', 'thu2', 'fri1', 'sat1', 'sun1', 'fri2', 'sat2', 'sun2', 'cmons1', 'cmons2', 'cmonc1', 'cmonc2', 'cmone1', 'cmone2', 'profit_mon1', 'profit_mon2', 'ctods1', 'ctods2', 'ctodc1', 'ctodc2', 'ctode1', 'ctode2', 'profit_tod1', 'profit_tod2', 'mont1', 'mont2'));
+
+        // Get today's sales, cost, expenses and profit per shop
+        $todayStats = $this->getTodayStats();
+
+        // Get monthly sales, cost, expenses and profit per shop
+        $monthlyStats = $this->getMonthlyStats();
+
+        // Get Top 5 Products by Profit for the current month
+        $topProducts = $this->getTopProductsByProfit();
+        
+        return view('home', compact('cash', 'credit', 'weekly_sales', 'todayStats', 'monthlyStats', 'montpA', 'montpB', 'montpC','topProducts'));
     }
 
-    function profitPerMonthA($month, $year)
+    public function getShopProfitPerMonth()
     {
-        $sales = Sales::selectRaw('SUM(sales.total_price) total_sales')
-            ->whereYear('sales.created_at', $year)
-            ->whereMonth('sales.created_at', $month)
-            ->where('shop_id', 1)
-            ->get();
-        $cost = Sales::selectRaw('ROUND(SUM(sales.units/stocks.units*(stocks.pcost+stocks.ccost+stocks.tcost)), 0) total_cost')
-            ->join('stocks', 'stocks.id', '=', 'sales.stock_id')
-            ->whereYear('sales.created_at', $year)
-            ->whereMonth('sales.created_at', $month)
-            ->where('shop_id', 1)
-            ->get();
-        $expense = Expense::selectRaw('SUM(expenses.amount) total_expenses')
-            ->whereYear('expenses.created_at', $year)
-            ->whereMonth('expenses.created_at', $month)
-            ->where('shop_id', 1)
-            ->get();
-        $profit = $sales[0]->total_sales - $cost[0]->total_cost - $expense[0]->total_expenses;
+        // Get period (last 8 months including current)
+        $period = now()->subMonths(7)->monthsUntil(now());
 
-        return $profit;
+        // ---- 1. SALES ----
+        $sales = Sales::selectRaw('
+                shop_id,
+                YEAR(created_at) as year,
+                MONTH(created_at) as month,
+                SUM(total_price) as total_sales
+            ')
+            ->whereBetween('created_at', [now()->subMonths(7)->startOfMonth(), now()->endOfMonth()])
+            ->groupBy('shop_id', 'year', 'month')
+            ->get()
+            ->keyBy(function($row) {
+                return $row->shop_id . '-' . $row->year . '-' . $row->month;
+            });
+
+        // ---- 2. COST ----
+        $costs = Sales::join('stocks', 'stocks.id', '=', 'sales.stock_id')
+            ->selectRaw('
+                sales.shop_id,
+                YEAR(sales.created_at) as year,
+                MONTH(sales.created_at) as month,
+                ROUND(SUM(sales.units/stocks.units*(stocks.pcost+stocks.ccost+stocks.tcost)), 0) as total_cost
+            ')
+            ->whereBetween('sales.created_at', [now()->subMonths(7)->startOfMonth(), now()->endOfMonth()])
+            ->groupBy('sales.shop_id', 'year', 'month')
+            ->get()
+            ->keyBy(function($row) {
+                return $row->shop_id . '-' . $row->year . '-' . $row->month;
+            });
+
+        // ---- 3. EXPENSE ----
+        $expenses = Expense::selectRaw('
+                shop_id,
+                YEAR(created_at) as year,
+                MONTH(created_at) as month,
+                SUM(amount) as total_expenses
+            ')
+            ->whereBetween('created_at', [now()->subMonths(7)->startOfMonth(), now()->endOfMonth()])
+            ->groupBy('shop_id', 'year', 'month')
+            ->get()
+            ->keyBy(function($row) {
+                return $row->shop_id . '-' . $row->year . '-' . $row->month;
+            });
+
+        // ---- 4. BUILD RESULTS ----
+        $shops = [1, 2, 3]; // shop IDs
+        $results = [];
+
+        foreach ($shops as $shop) {
+            $shopData = [];
+            foreach ($period as $date) {
+                $key = $shop . '-' . $date->year . '-' . $date->month;
+
+                $salesVal   = $sales[$key]->total_sales ?? 0;
+                $costVal    = $costs[$key]->total_cost ?? 0;
+                $expenseVal = $expenses[$key]->total_expenses ?? 0;
+
+                $shopData[] = [
+                    'month'  => $date->shortMonthName,
+                    'year'   => $date->year,
+                    'profit' => $salesVal - $costVal - $expenseVal,
+                ];
+            }
+            $results["shop{$shop}"] = $shopData;
+        }
+
+        return $results;
     }
 
-    function profitPerMonthB($month, $year)
+    public function weeklySales()
     {
-        $sales = Sales::selectRaw('SUM(sales.total_price) total_sales')
-            ->whereYear('sales.created_at', $year)
-            ->whereMonth('sales.created_at', $month)
-            ->where('shop_id', 2)
-            ->get();
-        $cost = Sales::selectRaw('ROUND(SUM(sales.units/stocks.units*(stocks.pcost+stocks.ccost+stocks.tcost)), 0) total_cost')
-            ->join('stocks', 'stocks.id', '=', 'sales.stock_id')
-            ->whereYear('sales.created_at', $year)
-            ->whereMonth('sales.created_at', $month)
-            ->where('shop_id', 2)
-            ->get();
-        $expense = Expense::selectRaw('SUM(expenses.amount) total_expenses')
-            ->whereYear('expenses.created_at', $year)
-            ->whereMonth('expenses.created_at', $month)
-            ->where('shop_id', 2)
-            ->get();
-        $profit = $sales[0]->total_sales - $cost[0]->total_cost - $expense[0]->total_expenses;
+        $weekStart = Carbon::now()->startOfWeek();
+        $weekEnd   = Carbon::now()->endOfWeek();
 
-        return $profit;
+        // Fetch all sales for the week across all shops in one query
+        $sales = Sales::selectRaw('shop_id, DAYOFWEEK(created_at) as day, SUM(total_price) as total')
+            ->whereBetween('created_at', [$weekStart, $weekEnd])
+            ->groupBy('shop_id', 'day')
+            ->get();
+
+        // Initialize array for all shops & days
+        $shops = [1, 2, 3]; // or fetch dynamically from DB
+        $days = collect(range(1,7))->mapWithKeys(function($d) {
+            // MySQL DAYOFWEEK returns 1=Sunday, 2=Monday...7=Saturday
+            // Map to proper labels if needed
+            return [$d => 0];
+        });
+
+        $result = [];
+
+        foreach ($shops as $shop) {
+            // Start with all days = 0
+            $result[$shop] = $days->toArray();
+
+            // Fill in actual totals
+            foreach ($sales->where('shop_id', $shop) as $row) {
+                $result[$shop][$row->day] = $row->total;
+            }
+        }
+
+        return $result;
     }
+
+    public function getTodayStats()
+    {
+        $today = Carbon::today()->toDateString();
+
+        // 1) Sales per shop
+        $sales = Sales::whereDate('sales.created_at', $today)
+            ->selectRaw('shop_id, SUM(sales.total_price) as total_sales')
+            ->groupBy('shop_id')
+            ->pluck('total_sales', 'shop_id');
+
+        // 2) Cost per shop
+        $costs = Sales::join('stocks', 'stocks.id', '=', 'sales.stock_id')
+            ->whereDate('sales.created_at', $today)
+            ->selectRaw('sales.shop_id, ROUND(SUM(sales.units/stocks.units*(stocks.pcost+stocks.ccost+stocks.tcost)), 0) as total_cost')
+            ->groupBy('sales.shop_id')
+            ->pluck('total_cost', 'sales.shop_id');
+
+        // 3) Expenses per shop
+        $expenses = Expense::whereDate('expenses.created_at', $today)
+            ->selectRaw('shop_id, SUM(expenses.amount) as total_expenses')
+            ->groupBy('shop_id')
+            ->pluck('total_expenses', 'shop_id');
+
+        // Merge results
+        $results = [];
+        $shopIds = array_unique(array_merge(
+            $sales->keys()->toArray(),
+            $costs->keys()->toArray(),
+            $expenses->keys()->toArray()
+        ));
+
+        foreach ([1, 2, 3] as $shopId) {
+            $s = $sales[$shopId] ?? 0;
+            $c = $costs[$shopId] ?? 0;
+            $e = $expenses[$shopId] ?? 0;
+
+            $results[$shopId] = [
+                'sales'    => $s,
+                'cost'     => $c,
+                'expenses' => $e,
+                'profit'   => $s - $c - $e,
+            ];
+        }
+
+        return $results;
+    }
+
+    public function getMonthlyStats()
+    {
+        $month = Carbon::now()->month;
+        $year = Carbon::now()->year;
+
+        $shops = [1, 2, 3]; // you can expand later
+        $monthlyStats = [];
+
+        foreach ($shops as $shopId) {
+            $sales = Sales::selectRaw('SUM(sales.total_price) as total_sales')
+                ->whereYear('sales.created_at', $year)
+                ->whereMonth('sales.created_at', $month)
+                ->where('shop_id', $shopId)
+                ->value('total_sales') ?? 0;
+
+            $cost = Sales::selectRaw('ROUND(SUM(sales.units/stocks.units*(stocks.pcost+stocks.ccost+stocks.tcost)), 0) as total_cost')
+                ->join('stocks', 'stocks.id', '=', 'sales.stock_id')
+                ->whereYear('sales.created_at', $year)
+                ->whereMonth('sales.created_at', $month)
+                ->where('shop_id', $shopId)
+                ->value('total_cost') ?? 0;
+
+            $expenses = Expense::selectRaw('SUM(expenses.amount) as total_expenses')
+                ->whereYear('expenses.created_at', $year)
+                ->whereMonth('expenses.created_at', $month)
+                ->where('shop_id', $shopId)
+                ->value('total_expenses') ?? 0;
+
+            $profit = $sales - $cost - $expenses;
+
+            $monthlyStats[$shopId] = [
+                'sales' => $sales,
+                'cost' => $cost,
+                'expenses' => $expenses,
+                'profit' => $profit,
+            ];
+        }
+
+        return $monthlyStats;
+    }
+
+    /**
+     * Get Top 5 Products by Profit for the current month
+     */
+    public function getTopProductsByProfit($limit = 5)
+    {
+        return Sales::select(
+                'products.name as product_name',
+                DB::raw('SUM(sales.total_price) as total_sales'),
+                DB::raw('ROUND(SUM(sales.units/stocks.units * (stocks.pcost + stocks.ccost + stocks.tcost)), 2) as total_cost'),
+                DB::raw('SUM(sales.total_price) - ROUND(SUM(sales.units/stocks.units * (stocks.pcost + stocks.ccost + stocks.tcost)), 2) as profit')
+            )
+            ->join('stocks', 'stocks.id', '=', 'sales.stock_id')
+            ->join('products', 'products.id', '=', 'stocks.product_id')
+            ->whereYear('sales.created_at', Carbon::now()->year)
+            ->whereMonth('sales.created_at', Carbon::now()->month)
+            ->groupBy('products.name')
+            ->orderByDesc('profit')
+            ->take($limit)
+            ->get();
+    }
+
 }

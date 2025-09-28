@@ -33,7 +33,7 @@
             <div class="card-header">
                 <h3 class="card-title">
                     <i class="fas fa-chart-pie mr-1"></i>
-                    Cash and Credit Sales Distribution
+                    {{ date('F') }} Top Products
                 </h3>
                 <div class="card-tools">
                     <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -97,28 +97,33 @@
                         <th></th>
                         <th>Shop A</th>
                         <th>Shop B</th>
+                        <th>Shop C</th>
                     </tr>
                     <tbody>
-                    <tr>
-                        <th>Total Sales</th>
-                        <td>{{"KES. ".number_format($ctods1[0]->total_sales)}}</td>
-                        <td>{{"KES. ".number_format($ctods2[0]->total_sales)}}</td>
-                    </tr>
-                    <tr>
-                        <th>Total Cost</th>
-                        <td>{{"KES. ".number_format($ctodc1[0]->total_cost)}}</td>
-                        <td>{{"KES. ".number_format($ctodc2[0]->total_cost)}}</td>
-                    </tr>
-                    <tr>
-                        <th>Total Expenses</th>
-                        <td>{{"KES. ".number_format($ctode1[0]->total_expenses)}}</td>
-                        <td>{{"KES. ".number_format($ctode2[0]->total_expenses)}}</td>
-                    </tr>
-                    <tr>
-                        <th>Total Profit</th>
-                        <td>{{"KES. ".number_format($profit_tod1)}}</td>
-                        <td>{{"KES. ".number_format($profit_tod2)}}</td>
-                    </tr>
+                        <tr>
+                            <th>Total Sales</th>
+                            <td>{{ "KES. " . number_format($todayStats[1]['sales']) }}</td>
+                            <td>{{ "KES. " . number_format($todayStats[2]['sales']) }}</td>
+                            <td>{{ "KES. " . number_format($todayStats[3]['sales']) }}</td>
+                        </tr>
+                        <tr>
+                            <th>Total Cost</th>
+                            <td>{{ "KES. " . number_format($todayStats[1]['cost']) }}</td>
+                            <td>{{ "KES. " . number_format($todayStats[2]['cost']) }}</td>
+                            <td>{{ "KES. " . number_format($todayStats[3]['cost']) }}</td>
+                        </tr>
+                        <tr>
+                            <th>Total Expenses</th>
+                            <td>{{ "KES. " . number_format($todayStats[1]['expenses']) }}</td>
+                            <td>{{ "KES. " . number_format($todayStats[2]['expenses']) }}</td>
+                            <td>{{ "KES. " . number_format($todayStats[3]['expenses']) }}</td>
+                        </tr>
+                        <tr>
+                            <th>Total Profit</th>
+                            <td>{{ "KES. " . number_format($todayStats[1]['profit']) }}</td>
+                            <td>{{ "KES. " . number_format($todayStats[2]['profit']) }}</td>
+                            <td>{{ "KES. " . number_format($todayStats[3]['profit']) }}</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -143,29 +148,34 @@
                         <th></th>
                         <th>Shop A</th>
                         <th>Shop B</th>
+                        <th>Shop C</th>
                     </tr>
                     <tbody>
                     <tr>
                         <th>Total Sales</th>
-                        <td>{{"KES. ".number_format($cmons1[0]->total_sales)}}</td>
-                        <td>{{"KES. ".number_format($cmons2[0]->total_sales)}}</td>
+                        <td>{{ number_format($monthlyStats[1]['sales']) }}</td>
+                        <td>{{ number_format($monthlyStats[2]['sales']) }}</td>
+                        <td>{{ number_format($monthlyStats[3]['sales']) }}</td>
                     </tr>
                     <tr>
                         <th>Total Cost</th>
-                        <td>{{"KES. ".number_format($cmonc1[0]->total_cost)}}</td>
-                        <td>{{"KES. ".number_format($cmonc2[0]->total_cost)}}</td>
+                        <td>{{ number_format($monthlyStats[1]['cost']) }}</td>
+                        <td>{{ number_format($monthlyStats[2]['cost']) }}</td>
+                        <td>{{ number_format($monthlyStats[3]['cost']) }}</td>
                     </tr>
                     <tr>
                         <th>Total Expenses</th>
-                        <td>{{"KES. ".number_format($cmone1[0]->total_expenses)}}</td>
-                        <td>{{"KES. ".number_format($cmone2[0]->total_expenses)}}</td>
+                        <td>{{ number_format($monthlyStats[1]['expenses']) }}</td>
+                        <td>{{ number_format($monthlyStats[2]['expenses']) }}</td>
+                        <td>{{ number_format($monthlyStats[3]['expenses']) }}</td>
                     </tr>
                     <tr>
                         <th>Total Profit</th>
-                        <td>{{"KES. ".number_format($profit_mon1)}}</td>
-                        <td>{{"KES. ".number_format($profit_mon2)}}</td>
+                        <td>{{ number_format($monthlyStats[1]['profit']) }}</td>
+                        <td>{{ number_format($monthlyStats[2]['profit']) }}</td>
+                        <td>{{ number_format($monthlyStats[3]['profit']) }}</td>
                     </tr>
-                    </tbody>
+                </tbody>
                 </table>
             </div>
         </div>
@@ -200,20 +210,24 @@
 @section('js')
 <script type="text/javascript">
     $(document).ready(function(){
-        loadSummarySalesCreditChart();
+        //loadSummarySalesCreditChart();
+        loadTopProductsChart();
         loadSummarySalesWeekly();
-        var mont1 = {!! json_encode($mont1) !!};
-        var mont2 = {!! json_encode($mont2) !!};
-        loadNetProfitTrendGraph(mont1, mont2);
+        var mont1 = {!! json_encode($montpA) !!};
+        var mont2 = {!! json_encode($montpB) !!};
+        var mont3 = {!! json_encode($montpC) !!};
+        // Build labels dynamically from Shop A (since months are same for all shops)
+        var labels = mont1.map(function(item) {
+            return item.month + " " + item.year;
+        });
+        loadNetProfitTrendGraph(labels, mont1, mont2, mont3);
         loadAlmostSoldOutStock();
-        //console.log(mont[0]['month']+" "+mont[0]['year']);
-        //console.log({{$credit}});
     });
 
-    function loadNetProfitTrendGraph(mont1, mont2){
+    function loadNetProfitTrendGraph(labels, mont1, mont2, mont3){
         var salesGraphChartCanvas = $('#line-chart').get(0).getContext('2d');
         var salesGraphChartData = {
-            labels: [mont1[0]['month']+" "+mont1[0]['year'], mont1[1]['month']+" "+mont1[1]['year'], mont1[2]['month']+" "+mont1[2]['year'], mont1[3]['month']+" "+mont1[3]['year'], mont1[4]['month']+" "+mont1[4]['year'], mont1[5]['month']+" "+mont1[5]['year'], mont1[6]['month']+" "+mont1[6]['year'], mont1[7]['month']+" "+mont1[7]['year']],
+            labels: labels,
             datasets: [
                 {
                     label: 'Shop A',
@@ -221,12 +235,12 @@
                     borderWidth: 2,
                     lineTension: 0,
                     spanGaps: true,
-                    borderColor: '#00a65a',
+                    borderColor: '#3b8bba',
                     pointRadius: 3,
                     pointHoverRadius: 7,
                     pointColor: '#efefef',
-                    pointBackgroundColor: '#00a65a',
-                    data: [mont1[0]['profit'], mont1[1]['profit'], mont1[2]['profit'], mont1[3]['profit'], mont1[4]['profit'], mont1[5]['profit'], mont1[6]['profit'], mont1[7]['profit']]
+                    pointBackgroundColor: '#3b8bba',
+                    data: mont1.map(item => item.profit)
                 },
                 {
                     label: 'Shop B',
@@ -239,7 +253,21 @@
                     pointHoverRadius: 7,
                     pointColor: '#efefef',
                     pointBackgroundColor: '#b2beb5',
-                    data: [mont2[0]['profit'], mont2[1]['profit'], mont2[2]['profit'], mont2[3]['profit'], mont2[4]['profit'], mont2[5]['profit'], mont2[6]['profit'], mont2[7]['profit']]
+                    data: mont2.map(item => item.profit)
+                }
+                ,
+                {
+                    label: 'Shop C',
+                    fill: false,
+                    borderWidth: 2,
+                    lineTension: 0,
+                    spanGaps: true,
+                    borderColor: '#00D100',
+                    pointRadius: 3,
+                    pointHoverRadius: 7,
+                    pointColor: '#efefef',
+                    pointBackgroundColor: '#00D100',
+                    data: mont3.map(item => item.profit)
                 }
             ]
         }
@@ -313,6 +341,45 @@
         })
     }
 
+    function loadTopProductsChart(){
+        var donutChartCanvas = $('#donutChart').get(0).getContext('2d')
+
+        var donutData = {
+            labels: [
+                @foreach($topProducts as $product)
+                    "{{ $product->product_name }}",
+                @endforeach
+            ],
+            datasets: [
+                {
+                    data: [
+                        @foreach($topProducts as $product)
+                            {{ (int) $product->profit }},
+                        @endforeach
+                    ],
+                    backgroundColor : [
+                        '#00a65a',
+                        '#f56954',
+                        '#f39c12',
+                        '#00c0ef',
+                        '#3c8dbc'
+                    ],
+                }
+            ]
+        }
+
+        var donutOptions = {
+            maintainAspectRatio : false,
+            responsive : true,
+        }
+
+        new Chart(donutChartCanvas, {
+            type: 'doughnut',
+            data: donutData,
+            options: donutOptions
+        })
+    }
+
     function loadSummarySalesWeekly(){
         //-------------
         //- BAR CHART -
@@ -323,24 +390,59 @@
               {
                 label               : 'Shop A',
                 backgroundColor     : 'rgba(60,141,188,0.9)',
-                borderColor         : 'rgba(60,141,188,0.8)',
+                borderColor         : '#fff',
                 pointRadius         : false,
                 pointColor          : '#3b8bba',
                 pointStrokeColor    : 'rgba(60,141,188,1)',
                 pointHighlightFill  : '#fff',
                 pointHighlightStroke: 'rgba(60,141,188,1)',
-                data                : [{{$mon1}}, {{$tue1}}, {{$wed1}}, {{$thu1}}, {{$fri1}}, {{$sat1}}, {{$sun1}}]
+                data                : [
+                    {{$weekly_sales[1][2]}}, // Monday
+                    {{$weekly_sales[1][3]}}, // Tuesday
+                    {{$weekly_sales[1][4]}}, // Wednesday
+                    {{$weekly_sales[1][5]}}, // Thursday
+                    {{$weekly_sales[1][6]}}, // Friday
+                    {{$weekly_sales[1][7]}}, // Saturday
+                    {{$weekly_sales[1][1]}}  // Sunday
+                ]
               },
               {
                 label               : 'Shop B',
                 backgroundColor     : 'rgba(210, 214, 222, 1)',
-                borderColor         : 'rgba(210, 214, 222, 1)',
+                borderColor         : '#fff',
                 pointRadius         : false,
                 pointColor          : 'rgba(210, 214, 222, 1)',
                 pointStrokeColor    : '#c1c7d1',
                 pointHighlightFill  : '#fff',
                 pointHighlightStroke: 'rgba(220,220,220,1)',
-                data                : [{{$mon2}}, {{$tue2}}, {{$wed2}}, {{$thu2}}, {{$fri2}}, {{$sat2}}, {{$sun2}}]
+                data                : [
+                    {{$weekly_sales[2][2]}}, // Monday
+                    {{$weekly_sales[2][3]}}, // Tuesday
+                    {{$weekly_sales[2][4]}}, // Wednesday
+                    {{$weekly_sales[2][5]}}, // Thursday
+                    {{$weekly_sales[2][6]}}, // Friday
+                    {{$weekly_sales[2][7]}}, // Saturday
+                    {{$weekly_sales[2][1]}}  // Sunday
+                ]
+              },
+              {
+                label               : 'Shop C',
+                backgroundColor     : 'rgba(0, 128, 0, 0.6)',
+                borderColor         : '#fff',
+                pointRadius         : false,
+                pointColor          : 'rgba(0, 128, 0, 0.6)',
+                pointStrokeColor    : '#006400',
+                pointHighlightFill  : '#fff',
+                pointHighlightStroke: 'rgba(0, 128, 0, 1)',
+                data                : [
+                    {{$weekly_sales[3][2]}}, // Monday
+                    {{$weekly_sales[3][3]}}, // Tuesday
+                    {{$weekly_sales[3][4]}}, // Wednesday
+                    {{$weekly_sales[3][5]}}, // Thursday
+                    {{$weekly_sales[3][6]}}, // Friday
+                    {{$weekly_sales[3][7]}}, // Saturday
+                    {{$weekly_sales[3][1]}}  // Sunday
+                ]
               },
             ]
         }
