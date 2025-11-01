@@ -240,10 +240,15 @@ return [
             'url'         => 'home',
             'icon'        => 'far fa-circle text-success',
         ],
-        ['header' => 'SALE'],
+        ['header' => 'SALES'],
         [
             'text'        => 'Record Sale',
             'url'         => 'sales/manage',
+            'icon'        => 'far fa-circle text-danger',
+        ],
+        [
+            'text'        => 'Sales Reports',
+            'url'         => 'sales/reports',
             'icon'        => 'far fa-circle text-danger',
         ],
         ['header' => 'EXPENSES'],
