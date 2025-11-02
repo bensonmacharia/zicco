@@ -36,7 +36,6 @@
                         <th>Clearance Cost</th>
                         <th>Transport Cost</th>
                         <th>Total Cost</th>
-                        <th>Action</th>
                     </tr>
                     </thead>
                 </table>
@@ -306,34 +305,7 @@
                 {data: 'ppcost', name: 'ppcost'},
                 {data: 'cccost', name: 'cccost'},
                 {data: 'ttcost', name: 'ttcost'},
-                {data: 'scost', name: 'scost'},
-                { "data": null,"sortable": false,
-                    render: function (data, type, row, meta) {
-                        var result = '<a class="btn btn-success btn-sm" \
-                                    data-id = '+row.id+' \
-                                    data-batch = \''+row.batch+'\' \
-                                    data-units = '+row.units+' \
-                                    data-pcost = \''+row.pcost+'\' \
-                                    data-ccost = \''+row.ccost+'\' \
-                                    data-tcost = \''+row.tcost+'\' \
-                                    data-esale = \''+row.esale+'\' \
-                                    data-asale = \''+row.asale+'\' \
-                                    data-payment = '+row.payment+' \
-                                    data-product_id = '+row.product_id+' \
-                                onclick="editOrder(this)" data-toggle="modal" data-target="#InputModal"><i class="fa fa-edit"></i></a>&nbsp;';
-                        result += '<a class="btn btn-info btn-sm"  \
-                                    data-id = '+row.id+' \
-                                    data-batch = \''+row.batch+'\' \
-                                    data-pcost = \''+row.pcost+'\' \
-                                    data-ccost = \''+row.ccost+'\' \
-                                    data-tcost = \''+row.tcost+'\' \
-                                    data-scost = \''+row.scost+'\' \
-                                    data-payment = '+row.payment+' \
-                                    data-product_id = '+row.product_id+' \
-                            onclick="editPayment(this)" data-toggle="modal" data-target="#PartnerModal"><i class="fa fa-check-circle"></i></a>';
-                        return result;
-                    }
-                }
+                {data: 'scost', name: 'scost'}
             ],
             oLanguage: {
                 sLengthMenu: "_MENU_",

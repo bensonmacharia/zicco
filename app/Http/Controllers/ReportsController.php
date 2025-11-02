@@ -130,6 +130,9 @@ class ReportsController extends Controller
             ->addColumn('customer', function ($data) {
                 return isset($data->customer->name) ? $data->customer->name : '';
             })
+            ->addColumn('shop', function ($data) {
+                        return isset($data->shop->name) ? $data->shop->name : '';
+            })
             ->addColumn('paid', function ($data) {
                 return $data->amnt_paid;
             })

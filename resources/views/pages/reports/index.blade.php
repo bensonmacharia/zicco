@@ -84,10 +84,8 @@ $config = [
                                 <th>Units</th>
                                 <th>Price</th>
                                 <th>Total Price</th>
-                                <th>Paid</th>
-                                <th>Balance</th>
                                 <th>Profit</th>
-                                <th>Receipt</th>
+                                <th>Shop</th>
                                 <th>Date</th>
                             </tr>
                         </thead>
@@ -118,7 +116,7 @@ $(document).ready(function(){
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
   });
-  $("#product").append('<tfoot><tr><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th></tr></tfoot>');
+  $("#product").append('<tfoot><tr><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th></tr></tfoot>');
   $("#sales_customer").append('<tfoot><tr><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th></tr></tfoot>');
   loadList();
 
@@ -144,10 +142,8 @@ function loadList() {
             {data: 'units', name: 'units'},
             {data: 'price', name: 'price'},
             {data: 'total_price', name: 'total_price'},
-            {data: 'paid', name: 'paid'},
-            {data: 'balance', name: 'balance'},
             {data: 'profit', name: 'profit'},
-            {data: 'rcpt_no', name: 'rcpt_no'},
+            {data: 'shop', name: 'shop'},
             {data: 'date_added', name: 'date_added'},
         ],
         oLanguage: {
@@ -168,24 +164,14 @@ function loadList() {
         fnFooterCallback: function(nRow, aaData, iStart, iEnd, aiDisplay) {
             var api = this.api();
             var total_price = 0;
-            var paid = 0;
-            var balance = 0;
             var profit = 0;
             aaData.forEach(function(x) {
                 total_price += (x['total_price']);
-                paid += (x['paid']);
-                balance += (x['balance']);
                 profit += (x['profit']);
             });
             // I need a footer in my table before doing this, what is the smartest way to add the footer?
             $(api.column(5).footer()).html(
                 total_price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-            );
-            $(api.column(6).footer()).html(
-                paid.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-            );
-            $(api.column(7).footer()).html(
-                balance.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
             );
             $(api.column(8).footer()).html(
                 profit.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
@@ -220,10 +206,8 @@ function getSaleByDate()
                 {data: 'units', name: 'units'},
                 {data: 'price', name: 'price'},
                 {data: 'total_price', name: 'total_price'},
-                {data: 'paid', name: 'paid'},
-                {data: 'balance', name: 'balance'},
                 {data: 'profit', name: 'profit'},
-                {data: 'rcpt_no', name: 'rcpt_no'},
+                {data: 'shop', name: 'shop'},
                 {data: 'date_added', name: 'date_added'},
             ],
             responsive: true,
@@ -245,24 +229,14 @@ function getSaleByDate()
             fnFooterCallback: function(nRow, aaData, iStart, iEnd, aiDisplay) {
                 var api = this.api();
                 var total_price = 0;
-                var paid = 0;
-                var balance = 0;
                 var profit = 0;
                 aaData.forEach(function(x) {
                     total_price += (x['total_price']);
-                    paid += (x['paid']);
-                    balance += (x['balance']);
                     profit += (x['profit']);
                 });
                 // I need a footer in my table before doing this, what is the smartest way to add the footer?
                 $(api.column(5).footer()).html(
                     total_price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                );
-                $(api.column(6).footer()).html(
-                    paid.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
-                );
-                $(api.column(7).footer()).html(
-                    balance.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
                 );
                 $(api.column(8).footer()).html(
                     profit.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")
