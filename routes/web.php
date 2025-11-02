@@ -73,6 +73,9 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('admin/expense/get-data', [App\Http\Controllers\ExpensesController::class, 'getData']);
     Route::post('admin/expense/save', [App\Http\Controllers\ExpensesController::class, 'store']);
     Route::get('sales/manage', [App\Http\Controllers\SalesController::class, 'index'])->name('sales');
+    Route::get('sales/reports', [App\Http\Controllers\SalesController::class, 'reports'])->name('reports');
+    Route::post('/sales/reports/by-date', [App\Http\Controllers\SalesController::class, 'salesReportByDate'])->name('sales.reports.by-date');
+    Route::post('sales/reports/by-month', [App\Http\Controllers\SalesController::class, 'salesReportByMonth'])->name('sales.reports.by-month');
     Route::get('admin/sale/update-stock-sales', [App\Http\Controllers\SalesController::class, 'updateStockSales']);
     Route::post('admin/sale/save', [App\Http\Controllers\SalesController::class, 'store']);
     Route::get('admin/sale/get-data', [App\Http\Controllers\SalesController::class, 'getData']);

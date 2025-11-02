@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Shop;
 use App\Models\Product;
 use App\Models\Customer;
+use App\Models\Expense;
 use App\Models\Sales;
 use App\Models\Stock;
+use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -122,6 +125,159 @@ class SalesController extends Controller {
 
             return response()->json($message)->setStatusCode(400);
         }
+    }
+
+    public function reports() {
+        $selectdDate = Carbon::today()->toDateString();
+        $displayDate = Carbon::parse($selectdDate)->format('d-M-Y');
+        $displayMonth = Carbon::now()->format('F Y');
+
+        // Get date sales, cost, expenses and profit per shop
+        $dateStats = $this->getDateStats($selectdDate);
+
+        // Get month sales, cost, expenses and profit per shop
+        $monthStats = $this->getMonthStats(Carbon::now()->month, Carbon::now()->year);
+
+        return view('pages/sales/reports', compact('displayDate','displayMonth','dateStats','monthStats'));
+    }
+
+    public function salesReportByDate(Request $request)
+    {
+        $selectedDate = $request->input('drSizeMd');
+
+        if (!$selectedDate) {
+            return response()->json(['error' => 'Date is required'], 400);
+        }
+
+        $dateStats = $this->getDateStats($selectedDate);
+        $displayDate = \Carbon\Carbon::parse($selectedDate)->format('d-M-Y');
+
+        return response()->json([
+            'displayDate' => $displayDate,
+            'stats' => [
+                'sales'    => [
+                    number_format($dateStats[1]['sales']),
+                    number_format($dateStats[2]['sales']),
+                    number_format($dateStats[3]['sales']),
+                ],
+                'cost'     => [
+                    number_format($dateStats[1]['cost']),
+                    number_format($dateStats[2]['cost']),
+                    number_format($dateStats[3]['cost']),
+                ],
+                'expenses' => [
+                    number_format($dateStats[1]['expenses']),
+                    number_format($dateStats[2]['expenses']),
+                    number_format($dateStats[3]['expenses']),
+                ],
+                'profit'   => [
+                    number_format($dateStats[1]['profit']),
+                    number_format($dateStats[2]['profit']),
+                    number_format($dateStats[3]['profit']),
+                ],
+            ]
+        ]);
+    }
+
+    public function salesReportByMonth(Request $request)
+    {
+        $month = $request->input('month');
+        $year = now()->year;
+
+        if (!$month) {
+            return response()->json(['error' => 'Month is required'], 400);
+        }
+
+        $stats = $this->getMonthStats($month, $year);
+
+        return response()->json([
+            'displayMonth' => Carbon::createFromDate($year, $month, 1)->format('F Y'),
+            'stats' => $stats,
+        ]);
+    }
+
+    public function getDateStats($selectdDate)
+    {
+        // 1) Sales per shop
+        $sales = Sales::whereDate('sales.created_at', $selectdDate)
+            ->selectRaw('shop_id, SUM(sales.total_price) as total_sales')
+            ->groupBy('shop_id')
+            ->pluck('total_sales', 'shop_id');
+
+        // 2) Cost per shop
+        $costs = Sales::join('stocks', 'stocks.id', '=', 'sales.stock_id')
+            ->whereDate('sales.created_at', $selectdDate)
+            ->selectRaw('sales.shop_id, ROUND(SUM(sales.units/stocks.units*(stocks.pcost+stocks.ccost+stocks.tcost)), 0) as total_cost')
+            ->groupBy('sales.shop_id')
+            ->pluck('total_cost', 'sales.shop_id');
+
+        // 3) Expenses per shop
+        $expenses = Expense::whereDate('expenses.created_at', $selectdDate)
+            ->selectRaw('shop_id, SUM(expenses.amount) as total_expenses')
+            ->groupBy('shop_id')
+            ->pluck('total_expenses', 'shop_id');
+
+        // Merge results
+        $results = [];
+        $shopIds = array_unique(array_merge(
+            $sales->keys()->toArray(),
+            $costs->keys()->toArray(),
+            $expenses->keys()->toArray()
+        ));
+
+        foreach ([1, 2, 3] as $shopId) {
+            $s = $sales[$shopId] ?? 0;
+            $c = $costs[$shopId] ?? 0;
+            $e = $expenses[$shopId] ?? 0;
+
+            $results[$shopId] = [
+                'sales'    => $s,
+                'cost'     => $c,
+                'expenses' => $e,
+                'profit'   => $s - $c - $e,
+            ];
+        }
+
+        return $results;
+    }
+
+    public function getMonthStats($month, $year)
+    {
+
+        $shops = [1, 2, 3]; // you can expand later
+        $monthlyStats = [];
+
+        foreach ($shops as $shopId) {
+            $sales = Sales::selectRaw('SUM(sales.total_price) as total_sales')
+                ->whereYear('sales.created_at', $year)
+                ->whereMonth('sales.created_at', $month)
+                ->where('shop_id', $shopId)
+                ->value('total_sales') ?? 0;
+
+            $cost = Sales::selectRaw('ROUND(SUM(sales.units/stocks.units*(stocks.pcost+stocks.ccost+stocks.tcost)), 0) as total_cost')
+                ->join('stocks', 'stocks.id', '=', 'sales.stock_id')
+                ->whereYear('sales.created_at', $year)
+                ->whereMonth('sales.created_at', $month)
+                ->where('shop_id', $shopId)
+                ->value('total_cost') ?? 0;
+
+            $expenses = Expense::selectRaw('SUM(expenses.amount) as total_expenses')
+                ->whereYear('expenses.created_at', $year)
+                ->whereMonth('expenses.created_at', $month)
+                ->where('shop_id', $shopId)
+                ->value('total_expenses') ?? 0;
+
+            $profit = $sales - $cost - $expenses;
+
+            $monthlyStats[$shopId] = [
+                'sales' => $sales,
+                'cost' => $cost,
+                'expenses' => $expenses,
+                'profit' => $profit,
+            ];
+        }
+
+        return $monthlyStats;
     }
 
     public function destroy($id) {
