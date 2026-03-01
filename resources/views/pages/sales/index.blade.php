@@ -74,7 +74,7 @@
                     <div class="form-group row">
                         <label for="stock_id" class="col-sm-3 col-form-label">Product *</label>
                         <div class="col-sm-9">
-                            <select class="form-control select2" id="stock_id" name="stock_id" style="width:80%">
+                            <select class="form-control select2" id="stock_id" name="stock_id">
                                 <option value=''>--Select--</option>
                                 @foreach($stock as $row)
                                 <option value="{{ $row->id }}">{{ $row->batch." - ".$row->product->name }}</option>
@@ -152,15 +152,23 @@
 
 @section('js')
 <script type="text/javascript">
-$(".select2").select2();
 
 $(document).ready(function(){
-  $.ajaxSetup({
+    $.fn.modal.Constructor.prototype.enforceFocus = function() {};
+
+    $(".select2").select2({
+        dropdownParent: $('#InputModal'),
+        width: '80%',
+        minimumResultsForSearch: 0,
+        dropdownAutoWidth: true
+    });
+
+    $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
-  });
-  loadList();
+    });
+    loadList();
 
 });
 
