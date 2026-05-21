@@ -32,10 +32,10 @@
                             <th>Units</th>
                             <th>Price</th>
                             <th>Total Price</th>
-                            <th>Paid</th>
                             <th>Balance</th>
                             <th>Receipt</th>
                             <th>Shop</th>
+                            <th>Seller</th>
                             <th>Date</th>
                             <th>Action</th>
                         </tr>
@@ -104,6 +104,17 @@
                             <select class="form-control select2" id="customer_id" name="customer_id" style="width:50%">
                                 <option value=''>--Select--</option>
                                 @foreach($customer as $row)
+                                <option value="{{ $row->id }}">{{ $row->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label for="seller_id" class="col-sm-3 col-form-label">Sold By *</label>
+                        <div class="col-sm-9">
+                            <select class="form-control select2" id="seller_id" name="seller_id" style="width:50%">
+                                <option value=''>--Select--</option>
+                                @foreach($seller as $row)
                                 <option value="{{ $row->id }}">{{ $row->name }}</option>
                                 @endforeach
                             </select>
@@ -192,10 +203,10 @@ function loadList() {
             {data: 'units', name: 'units'},
             {data: 'price', name: 'price'},
             {data: 'total_price', name: 'total_price'},
-            {data: 'paid', name: 'paid'},
             {data: 'balance', name: 'balance'},
             {data: 'rcpt_no', name: 'rcpt_no'},
             {data: 'shop', name: 'shop'},
+            {data: 'seller', name: 'seller'},
             {data: 'date_added', name: 'date_added'},
             { "data": null,"sortable": false,
                 render: function (data, type, row, meta) {
@@ -208,6 +219,7 @@ function loadList() {
                                     data-amnt_paid = '+row.amnt_paid+' \
                                     data-rcpt_no = '+row.rcpt_no+' \
                                     data-shop_id = '+row.shop_id+' \
+                                    data-seller_id = '+row.seller_id+' \
                                     data-inv_no = '+row.inv_no+' \
                                 onclick="editSale(this)" data-toggle="modal" data-target="#InputModal"><i class="fa fa-edit"></i> edit</a>&nbsp;';
                         return result;
@@ -241,6 +253,7 @@ function editSale(e) {
         $('#amnt_paid').val($(e).data('amnt_paid'));
         $('#rcpt_no').val($(e).data('rcpt_no'));
         $('#shop_id').val($(e).data('shop_id')).trigger('change');
+        $('#seller_id').val($(e).data('seller_id')).trigger('change');
         $('#inv_no').val($(e).data('inv_no'));
 
         $('.alert').hide();
@@ -254,6 +267,7 @@ function editSale(e) {
     let units = document.getElementById('units').value;
     let price = document.getElementById('price').value;
     let customer_id = $('#customer_id').val();
+    let seller_id = $('#seller_id').val();
     let amnt_paid = document.getElementById('amnt_paid').value;
     let rcpt_no = document.getElementById('rcpt_no').value;
     let inv_no = document.getElementById('inv_no').value;
@@ -272,6 +286,7 @@ function editSale(e) {
                 form_data.append('units', units);
                 form_data.append('price', price);
                 form_data.append('customer_id', customer_id);
+                form_data.append('seller_id', seller_id);
                 form_data.append('amnt_paid', amnt_paid);
                 form_data.append('rcpt_no', rcpt_no);
                 form_data.append('inv_no', inv_no);
@@ -356,6 +371,7 @@ function resetForm(){
     $('#rcpt_no').val('');
     $('#shop_id').val('').trigger('change');
     $('#inv_no').val('');
+    $('#seller_id').val('').trigger('change');
     $('.alert').hide();
     $('#formSale').trigger("reset");
 }

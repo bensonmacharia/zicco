@@ -34,4 +34,9 @@ class Sales extends Model
     {
         return $this->belongsTo(Shop::class);
     }
+
+    public function seller()
+    {
+        return $this->belongsTo(Seller::class);
+    }
 }

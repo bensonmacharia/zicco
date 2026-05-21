@@ -119,6 +119,91 @@ $currentMonth = now()->month;
                                 <th>Shop C</th>
                             </tr>
                         </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-3">
+   <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-table mr-1"></i> {{ $displayDate }} Seller Summary</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
+                </div>
+            </div>
+            <div class="card-body d-flex flex-column">
+                <div class="form-group">
+                    <label for="seller_date_picker" class="font-weight-bold">Select Date *</label>
+                    <div>
+                        <x-adminlte-date-range id="seller_date_picker" name="drSizeMd" igroup-size="md" :config="$config">
+                            <x-slot name="appendSlot">
+                                <div class="input-group-text"><i class="fas fa-calendar"></i></div>
+                            </x-slot>
+                        </x-adminlte-date-range>
+                    </div>
+                </div>
+                <div class="table-responsive mt-3 mb-0">
+                    <table id="seller-report-table" class="table table-hover table-sm text-nowrap mb-0">
+                        <thead>
+                            <tr>
+                                <th></th>
+
+                                @foreach ($sellers as $seller)
+                                    <th>{{ $seller->name }}</th>
+                                @endforeach
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card h-100">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fas fa-calendar mr-1"></i> {{ $displayMonth }} Seller Summary</h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse"><i class="fas fa-minus"></i></button>
+                </div>
+            </div>
+
+            <div class="card-body d-flex flex-column">
+                @if ($errors->any())
+                    <div class="alert alert-danger mb-3">
+                        <ul class="mb-0">
+                            @foreach ($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                <div class="form-group">
+                    <label for="seller_month" class="font-weight-bold">Select Month *</label>
+                    <div>
+                        <x-adminlte-select id="seller_month" name="month" igroup-size="md">
+                            @foreach ($months as $num => $name)
+                                <option value="{{ $num }}" {{ $num == $currentMonth ? 'selected' : '' }}>{{ $name }}</option>
+                            @endforeach
+                        </x-adminlte-select>
+                    </div>
+                </div>
+
+                <div class="table-responsive mt-3 mb-0">
+                    <table id="seller-monthly-report-table" class="table table-hover table-sm text-nowrap mb-0">
+                        <thead>
+                            <tr>
+                                <th></th>
+
+                                @foreach ($sellers as $seller)
+                                    <th>{{ $seller->name }}</th>
+                                @endforeach
+                            </tr>
+                        </thead>
                         <!-- tbody is injected by JS -->
                     </table>
                 </div>
@@ -172,6 +257,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // Trigger initial loads for both daily and monthly
     loadDailyForToday();
     loadMonthlyForCurrent();
+    getSellerReportByDate(today);
+    let currentMonth = moment().month() + 1;
+    getSellerReportByMonth(currentMonth);
 
     // -----------------------
     // Event listeners
@@ -192,11 +280,24 @@ document.addEventListener('DOMContentLoaded', function () {
         if (date) getSalesReportByDate(date);
     });
 
+    $(document).on('change', '#seller_date_picker',function() {
+        let date = $(this).val();
+        if (date) getSellerReportByDate(date);
+    });
+
     // Month select: trigger when user selects a month
     $(document).on('change', '#selected_month', function() {
         let month = $(this).val();
         if (month) getSalesReportByMonth(month);
     });
+
+    $(document).on('change', '#seller_month', function() {
+        let month = $(this).val();
+        if (month) {
+            getSellerReportByMonth(month);
+        }
+    });
+
 });
 
 // Helpers to load initial data
@@ -324,6 +425,118 @@ function getSalesReportByMonth(monthArg) {
         .fail(function() {
             Swal.fire("Error!", "Could not fetch monthly report data", "error");
         });
+}
+
+function getSellerReportByDate(dateArg)
+{
+    let selected_date =
+        dateArg || $('#seller_date_picker').val();
+
+    if (!selected_date) return;
+
+    $.post(
+        "{{ route('sales.reports.by-date') }}",
+        {
+            drSizeMd: selected_date
+        }
+    )
+    .done(function(response) {
+
+        let stats =
+            response.sellerStats || {};
+
+        buildSellerDailyTable(stats);
+    });
+}
+
+function getSellerReportByMonth(monthArg)
+{
+    let month =
+        monthArg || $('#seller_month').val();
+
+    if (!month) return;
+
+    $.post(
+        "{{ route('sales.reports.by-month') }}",
+        {
+            month: month
+        }
+    )
+    .done(function(response) {
+
+        let stats =
+            response.sellerMonthStats || {};
+
+        buildSellerMonthlyTable(stats);
+    });
+}
+
+function buildSellerDailyTable(stats)
+{
+    let tbody = '';
+
+    tbody += `<tr><th>Total Sales</th>`;
+
+    stats.sales.forEach(function(value) {
+        tbody += `<td>KES. ${value}</td>`;
+    });
+
+    tbody += `</tr>`;
+
+    tbody += `<tr><th>Total Cost</th>`;
+
+    stats.cost.forEach(function(value) {
+        tbody += `<td>KES. ${value}</td>`;
+    });
+
+    tbody += `</tr>`;
+
+    tbody += `<tr><th>Total Profit</th>`;
+
+    stats.profit.forEach(function(value) {
+        tbody += `<td>KES. ${value}</td>`;
+    });
+
+    tbody += `</tr>`;
+
+    $('#seller-report-table tbody').remove();
+
+    $('#seller-report-table')
+        .append(`<tbody>${tbody}</tbody>`);
+}
+
+function buildSellerMonthlyTable(stats)
+{
+    let tbody = '';
+
+    tbody += `<tr><th>Total Sales</th>`;
+
+    stats.sales.forEach(function(value) {
+        tbody += `<td>KES. ${value}</td>`;
+    });
+
+    tbody += `</tr>`;
+
+    tbody += `<tr><th>Total Cost</th>`;
+
+    stats.cost.forEach(function(value) {
+        tbody += `<td>KES. ${value}</td>`;
+    });
+
+    tbody += `</tr>`;
+
+    tbody += `<tr><th>Total Profit</th>`;
+
+    stats.profit.forEach(function(value) {
+        tbody += `<td>KES. ${value}</td>`;
+    });
+
+    tbody += `</tr>`;
+
+    $('#seller-monthly-report-table tbody').remove();
+
+    $('#seller-monthly-report-table')
+        .append(`<tbody>${tbody}</tbody>`);
 }
 </script>
 @stop
